@@ -1,4 +1,4 @@
-from win_probabilities import State, ROW, COL, DIAG, X, O, EMPTY
+from identify_threats import State, ROW, COL, DIAG, X, O, EMPTY
 import unittest
 
 class ThreatDetectionTest(unittest.TestCase):
