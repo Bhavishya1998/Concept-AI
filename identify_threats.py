@@ -5,6 +5,7 @@ O = 3
 EMPTY = 1
 
 BOARD_SIZE = 3
+NUM_LINES = 2*BOARD_SIZE + 2
 
 # will be used to identify where a threat or double threat is
 ROW = 0
@@ -19,100 +20,92 @@ class State:
         # NOTE call calc_products?
         self._calc_products()
 
+    def _other_player(self, player):
+        """ Take a player and returns the other player(opponent). """
+
+        return O if player == X else X 
+
+    def cell_row_col(self, cell):
+        """ Return a tuple (row, col) where row is the index of the row of the cell and col is the index of its column. """
+
+        x, y = cell
+        row = y
+        col = x + BOARD_SIZE
+
+        return (row, col)
+
+    def cell_diags(self, cell):
+        """ Return list of indices of all diagonals the cell belongs to. """
+
+        x, y = cell
+        diags = []
+        if x == y:
+            diags.append(2*BOARD_SIZE)
+        if x + y == BOARD_SIZE - 1:
+            diags.append(2*BOARD_SIZE + 1)
+
+        return diags
+    
     def _calc_products(self):
         """ Calculate the products across all lines. """
 
-        self.row_prods = [1, 1, 1]
-        self.col_prods = [1, 1, 1]
-        self.diag_prods = [1, 1]
+        self.line_prods = [1] * NUM_LINES
 
         for y in range(BOARD_SIZE):
             for x in range(BOARD_SIZE):
-                self.row_prods[y] *= self.board[y][x]
-                self.col_prods[x] *= self.board[y][x]
+                row, col = self.cell_row_col((x, y))
+                self.line_prods[row] *= self.board[y][x]
+                self.line_prods[col] *= self.board[y][x]
 
-                # check if cell is in leading diagonal
-                if x == y:
-                    self.diag_prods[0] *= self.board[y][x]
+                for diag in self.cell_diags((x, y)):
+                    self.line_prods[diag] *= self.board[y][x]
 
-                # check if cell is in non-leading diagonal
-                if x + y == BOARD_SIZE - 1:
-                    self.diag_prods[1] *= self.board[y][x]
+    def line_type(self, line):
+        """ Return the line type (row, column or diagonal) from the index of the line. """
+
+        if line < BOARD_SIZE:
+            return ROW
+        elif line < 2*BOARD_SIZE:
+            return COL
+        else:
+            return DIAG
 
     def existing_threats(self, player):
         """
-        Return list of all existing threats by player.
+        Return list of line indices where the player poses a threat.
         """
 
-        other_player = X if player == O else O
-
-        if player == X:
-            threat = X ** 2
-        else:
-            threat = O ** 2
-
-        existing_threats = []
-
-        for i in range(BOARD_SIZE):
-            if self.row_prods[i] == threat and self.row_prods[i] % other_player != 0:
-                existing_threats.append((ROW, i))
-            if self.col_prods[i] == threat and self.col_prods[i] % other_player != 0:
-                existing_threats.append((COL, i))
-
-        for i in range(2):
-            if self.diag_prods[i] == threat and self.diag_prods[i] % other_player != 0:
-                existing_threats.append((DIAG, i))
-
-        return existing_threats
+        threat = X ** 2 if player == X else O ** 2
+        indices = [i for i in range(NUM_LINES)]
+        return list(filter(lambda x: x is not None, map(lambda l, i: i if l == threat else None, self.line_prods, indices)))
 
     def double_threats(self, player):
         """
-        Return the output of existing_threats if multiple threats exist. Else return None.
+        Return the output of existing_threats if multiple threats exist. Else return an empty list.
         """
 
         existing_threats = self.existing_threats(player)
-        if len(existing_threats) > 1:
-            return existing_threats
-        else:
-            return []
+        return existing_threats if len(existing_threats) > 1 else []
             
     def cells_in_line(self, line):
         """ Return list of all cells in line. """
 
-        type, index = line
-
-        cells = []
+        type = self.line_type(line)
 
         if type == ROW:
-            for i in range(BOARD_SIZE):
-                cells.append((i, index))
+            return [(i, line) for i in range(BOARD_SIZE)]
         elif type == COL:
-            for i in range(BOARD_SIZE):
-                cells.append((index, i))
+            return [(line - BOARD_SIZE, i) for i in range(BOARD_SIZE)]
         else:
-            for i in range(BOARD_SIZE):
-                cells.append((i, i + 2*index*(1-i)))
+            return [(i, i + 2*(line - 2*BOARD_SIZE)*(1-i)) for i in range(BOARD_SIZE)]
 
-        return cells
-
-    def lines_available_to_player(self, player):
+    def available_lines(self, player):
         """ Return list of all lines available to a player. """
 
-        other_player = X if player == O else O
+        other_player = self._other_player(player)
+        indices = [i for i in range(NUM_LINES)]
 
-        available_lines = []
-
-        for i in range(BOARD_SIZE):
-            if self.row_prods[i] % other_player != 0:
-                available_lines.append((ROW, i))
-            if self.col_prods[i] % other_player != 0:
-                available_lines.append((COL, i))
-
-        for i in range(2):
-            if self.diag_prods[i] % other_player != 0:
-                available_lines.append((DIAG, i))
-
-        return available_lines
+        return list(filter(lambda x: x is not None ,map(lambda l, i: i if l % other_player != 0 else None, self.line_prods, indices)))
 
     def empty_cells_in_line(self, line):
         """ Return list containing all empty cells in a line. """
@@ -129,47 +122,40 @@ class State:
         line2_cells = self.cells_in_line(line2)
 
         intersection_set = set(line1_cells).intersection(set(line2_cells))
-
-        if len(intersection_set) == 0: 
-            # lines don't intersect
-            return None
-        else:
-            return intersection_set.pop()
+        
+        return None if len(intersection_set) == 0 else intersection_set.pop()
 
     def line_poses_potential_threat(self, line, player):
         """ Return true if player poses potential threat on the line. """
 
-        type, index = line
-
-        return (type == ROW and self.row_prods[index] // player == 1) \
-        or (type == COL and self.col_prods[index] // player == 1) \
-        or (type == DIAG and self.diag_prods[index] // player == 1)
+        other_player = self._other_player(player)
+        return self.line_prods[line] % other_player != 0 and self.line_prods[line] // player == 1
 
     def potential_threats(self, player):
         """ Return list of all potential moves by player that would pose a threat. """
 
-        available_lines = self.lines_available_to_player(player)
+        available_lines = self.available_lines(player)
         
         # NOTE Just return the list of cells? Would have to eliminate duplicates then.
-        return list(map(lambda l: (l, self.empty_cells_in_line(l)), 
-                   filter(lambda l: self.line_poses_potential_threat(l, player), available_lines)))
+        return list(map(lambda l: (l, self.empty_cells_in_line(l)), filter(lambda l: self.line_poses_potential_threat(l, player), available_lines)))
 
     def potential_double_threats(self, player):
         """ Return list of all potential moves by player that would pose a double threat. """
         
-        threatening_lines = self.potential_threats(player)
+        potential_threats = self.potential_threats(player)
 
         potential_double_threats = []
 
-        for i in range(len(threatening_lines)):
-            for j in range(i+1, len(threatening_lines)):
-                line1 = threatening_lines[i][0]
-                line2 = threatening_lines[j][0]
+        for i in range(len(potential_threats)):
+            for j in range(i+1, len(potential_threats)):
+                line1 = potential_threats[i][0]
+                line2 = potential_threats[j][0]
+                
                 intersection_cell = self.line_intersection_cell(line1, line2)
                 if intersection_cell is not None:
                     x, y = intersection_cell
                     if self.board[y][x] == EMPTY:
-                        potential_double_threats.append(intersection_cell)
+                        potential_double_threats.append((line1, line2, intersection_cell))
 
         return potential_double_threats
 
