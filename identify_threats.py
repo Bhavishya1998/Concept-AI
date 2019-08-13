@@ -124,20 +124,22 @@ class State:
         available = occupied + unoccupied
 
         for line1 in range(NUM_LINES):
-            
             occupancy_line1 = self._occupancy(line1)
             
             for line2 in range(line1 + 1, NUM_LINES):
-            
                 occupancy_line2 = self._occupancy(line2)
 
+                intersection_cell = self.line_intersection_cell(line1, line2)
+
                 # if the lines intersect
-                if self.line_intersection_cell(line1, line2) is not None:
+                if intersection_cell is not None:
                     if occupancy_line1 * occupancy_line2 == UNOCCUPIED * UNOCCUPIED:
                         uu += 1
                     elif occupancy_line1 * occupancy_line2 == player * UNOCCUPIED:
                         ou += 1
-                    elif occupancy_line1 * occupancy_line2 == player * player:
+                    elif occupancy_line1 * occupancy_line2 == player * player and \
+                         self.board[intersection_cell[1]][intersection_cell[0]] == EMPTY:
+                        
                         oo += 1
 
         return [unoccupied, occupied, attack, available, killed, uu, ou, oo]
