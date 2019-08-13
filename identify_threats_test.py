@@ -163,7 +163,17 @@ class ThreatDetectionTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(state.state_vector(X), [1, 2, 0, 3, 5, 0, 2, 0])
+        self.assertEqual(state.state_vector(X), [1, 2, 0, 3, 5, 0, 2, 1])
+        self.assertEqual(state.state_vector(O), [1, 2, 0, 3, 5, 0, 1, 1])
+
+        board = [
+            [X, O, EMPTY],
+            [EMPTY, X, EMPTY],
+            [O, X, EMPTY]
+        ]
+        state = State(board)
+        self.assertEqual(state.state_vector(X), [1, 2, 1, 3, 5, 0, 2, 1])
+        self.assertEqual(state.state_vector(O), [1, 0, 0, 1, 7, 0, 0, 0])
 
 if __name__ == "__main__":
     unittest.main()
