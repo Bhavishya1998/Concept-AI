@@ -154,5 +154,16 @@ class ThreatDetectionTest(unittest.TestCase):
         state = State(board)
         self.assertEqual(state.potential_double_threats(X), [(0, 4, (1, 0))])
 
+    def test_state_vector(self):
+        
+        # TODO write tests
+        board = [
+            [EMPTY, O, EMPTY],
+            [EMPTY, X, EMPTY],
+            [O, X, EMPTY]
+        ]
+        state = State(board)
+        self.assertEqual(state.state_vector(X), [1, 2, 0, 3, 5, 0, 2, 0])
+
 if __name__ == "__main__":
     unittest.main()

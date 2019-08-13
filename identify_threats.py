@@ -12,13 +12,16 @@ ROW = 0
 COL = 1
 DIAG = 2
 
+MUTUALLY_KILLED = 0
+UNOCCUPIED = 5
+
 class State:
 
-    def __init__(self, board):
+    def __init__(self, board, calc_products=True):
         self.board = board
 
-        # NOTE call calc_products?
-        self._calc_products()
+        if calc_products:
+            self._calc_products()
 
     def _other_player(self, player):
         """ Take a player and returns the other player(opponent). """
@@ -59,6 +62,86 @@ class State:
 
                 for diag in self.cell_diags((x, y)):
                     self.line_prods[diag] *= self.board[y][x]
+
+    def _occupancy(self, line):
+        """
+        Classify line as:
+            - Singly occupied: X/O
+            - Unoccupied: UNOCCUPIED
+            - killed: KILLED
+        """
+
+        if self.line_prods[line] == 1:
+            return UNOCCUPIED
+        elif self.line_prods[line] % X == 0 and self.line_prods[line] % O == 0:
+            return MUTUALLY_KILLED
+        elif self.line_prods[line] % X == 0:
+            return X
+        else:
+            return O
+
+    # TODO do we need this?
+    def classify_lines(self):
+        """
+        Classify all lines as:
+            - Unoccupied -> 1
+            - Singly Occupied -> X/O
+            - Threat -> X^2/O^2
+            - Mutually killed -> 0
+        """
+
+        return list(map(lambda l: 0 if l % X == 0 and l % O == 0 else l, self.line_prods))
+
+    def state_vector(self, player):
+        """ Return the state vector for a player. """
+
+        other_player = self._other_player(player)
+
+        unoccupied = 0
+        occupied = 0
+        attack = 0
+        available = 0
+        killed = 0
+
+        # TODO refactor
+        uu = 0
+        ou = 0
+        oo = 0
+
+        for line in range(NUM_LINES):
+            occupancy = self._occupancy(line)
+            
+            if occupancy == player:
+                occupied += 1
+            elif occupancy == other_player or occupancy == MUTUALLY_KILLED:
+                killed += 1
+            elif occupancy == UNOCCUPIED:
+                unoccupied += 1
+            
+            if self.line_prods[line] == player ** 2:
+                attack += 1
+
+        available = occupied + unoccupied
+
+        for line1 in range(NUM_LINES):
+            
+            occupancy_line1 = self._occupancy(line1)
+            
+            for line2 in range(line1 + 1, NUM_LINES):
+            
+                occupancy_line2 = self._occupancy(line2)
+
+                # if the lines intersect
+                if self.line_intersection_cell(line1, line2) is not None:
+                    if occupancy_line1 * occupancy_line2 == UNOCCUPIED * UNOCCUPIED:
+                        uu += 1
+                    elif occupancy_line1 * occupancy_line2 == player * UNOCCUPIED:
+                        ou += 1
+                    elif occupancy_line1 * occupancy_line2 == player * player:
+                        oo += 1
+
+        return [unoccupied, occupied, attack, available, killed, uu, ou, oo]
+
 
     def line_type(self, line):
         """ Return the line type (row, column or diagonal) from the index of the line. """
