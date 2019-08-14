@@ -17,11 +17,21 @@ UNOCCUPIED = 5
 
 class State:
 
-    def __init__(self, board, calc_products=True):
+    def __init__(self, board, calc_vectors=True):
         self.board = board
 
-        if calc_products:
+        self.intersections = {
+            X: {"uu": [], "ou": [], "oo": []}, 
+            O: {"uu": [], "ou": [], "oo": []}
+        }
+
+        # TODO refactor
+        self.state_vectors = {}
+
+        if calc_vectors:
             self._calc_products()
+            self.calc_state_vector(X)
+            self.calc_state_vector(O)
 
     def _other_player(self, player):
         """ Take a player and returns the other player(opponent). """
@@ -92,34 +102,36 @@ class State:
 
         return list(map(lambda l: 0 if l % X == 0 and l % O == 0 else l, self.line_prods))
 
-    def state_vector(self, player):
-        """ Return the state vector for a player. """
+    def calc_state_vector(self, player):
+        """ Calculate and store the state vector for a player. """
 
         other_player = self._other_player(player)
 
-        unoccupied = 0
-        occupied = 0
-        attack = 0
-        available = 0
-        killed = 0
+        unoccupied = []
+        occupied = []
+        attack = []
+        available = []
+        killed = []
 
         # TODO refactor
-        uu = 0
-        ou = 0
-        oo = 0
+        uu = []
+        ou = []
+        oo = []
 
         for line in range(NUM_LINES):
             occupancy = self._occupancy(line)
             
             if occupancy == player:
-                occupied += 1
+                occupied.append(line)
             elif occupancy == other_player or occupancy == MUTUALLY_KILLED:
-                killed += 1
+                killed.append(line)
             elif occupancy == UNOCCUPIED:
-                unoccupied += 1
+                unoccupied.append(line)
             
             if self.line_prods[line] == player ** 2:
-                attack += 1
+
+                # store (line, attacked cell) tuples
+                attack.append((line, self.empty_cells_in_line(line)[0]))
 
         available = occupied + unoccupied
 
@@ -134,16 +146,20 @@ class State:
                 # if the lines intersect
                 if intersection_cell is not None:
                     if occupancy_line1 * occupancy_line2 == UNOCCUPIED * UNOCCUPIED:
-                        uu += 1
+                        uu.append((line1, line2, intersection_cell))
                     elif occupancy_line1 * occupancy_line2 == player * UNOCCUPIED:
-                        ou += 1
+                        ou.append((line1, line2, intersection_cell))
                     elif occupancy_line1 * occupancy_line2 == player * player and \
-                         self.board[intersection_cell[1]][intersection_cell[0]] == EMPTY:
+                        self.board[intersection_cell[1]][intersection_cell[0]] == EMPTY:
                         
-                        oo += 1
+                        oo.append((line1, line2, intersection_cell))
 
-        return [unoccupied, occupied, attack, available, killed, uu, ou, oo]
+        self.state_vectors[player] = [unoccupied, occupied, attack, available, killed, uu, ou, oo]
 
+    def count_state_vector(self, player):
+        """ Return a vector with the lengths of all state vector lists of the input player. """
+
+        return list(map(len, self.state_vectors[player]))
 
     def line_type(self, line):
         """ Return the line type (row, column or diagonal) from the index of the line. """
