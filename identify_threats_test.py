@@ -1,4 +1,4 @@
-from identify_threats import State, ROW, COL, DIAG, X, O, EMPTY
+from identify_threats import State, X, O, EMPTY
 import unittest
 
 class ThreatDetectionTest(unittest.TestCase):
@@ -155,15 +155,15 @@ class ThreatDetectionTest(unittest.TestCase):
         self.assertEqual(state.potential_double_threats(X), [(0, 4, (1, 0))])
 
     def test_state_vector(self):
-        
+
         board = [
             [EMPTY, O, EMPTY],
             [EMPTY, X, EMPTY],
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(state.state_vector(X), [1, 2, 0, 3, 5, 0, 2, 0])
-        self.assertEqual(state.state_vector(O), [1, 2, 0, 3, 5, 0, 1, 1])
+        self.assertEqual(state.count_state_vector(X), [1, 2, 0, 3, 5, 0, 2, 0])
+        self.assertEqual(state.count_state_vector(O), [1, 2, 0, 3, 5, 0, 1, 1])
 
         board = [
             [X, O, EMPTY],
@@ -171,8 +171,8 @@ class ThreatDetectionTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(state.state_vector(X), [1, 2, 1, 3, 5, 0, 2, 0])
-        self.assertEqual(state.state_vector(O), [1, 0, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(state.count_state_vector(X), [1, 2, 1, 3, 5, 0, 2, 0])
+        self.assertEqual(state.count_state_vector(O), [1, 0, 0, 1, 7, 0, 0, 0])
 
         board = [
             [EMPTY, O, X],
@@ -180,8 +180,8 @@ class ThreatDetectionTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(state.state_vector(X), [0, 3, 0, 3, 5, 0, 0, 2])
-        self.assertEqual(state.state_vector(O), [0, 1, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(state.count_state_vector(X), [0, 3, 0, 3, 5, 0, 0, 2])
+        self.assertEqual(state.count_state_vector(O), [0, 1, 0, 1, 7, 0, 0, 0])
 
         board = [
             [EMPTY, O, EMPTY],
@@ -189,8 +189,8 @@ class ThreatDetectionTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(state.state_vector(X), [0, 1, 0, 1, 7, 0, 0, 0])
-        self.assertEqual(state.state_vector(O), [0, 2, 0, 2, 6, 0, 0, 1])
+        self.assertEqual(state.count_state_vector(X), [0, 1, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(state.count_state_vector(O), [0, 2, 0, 2, 6, 0, 0, 1])
 
 if __name__ == "__main__":
     unittest.main()
