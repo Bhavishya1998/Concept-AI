@@ -20,11 +20,6 @@ class State:
     def __init__(self, board, calc_vectors=True):
         self.board = board
 
-        self.intersections = {
-            X: {"uu": [], "ou": [], "oo": []}, 
-            O: {"uu": [], "ou": [], "oo": []}
-        }
-
         # TODO refactor
         self.state_vectors = {}
 
@@ -154,12 +149,21 @@ class State:
                         
                         oo.append((line1, line2, intersection_cell))
 
-        self.state_vectors[player] = [unoccupied, occupied, attack, available, killed, uu, ou, oo]
+        self.state_vectors[player] = {
+            "unoccupied": unoccupied, 
+            "occupied": occupied, 
+            "attack": attack, 
+            "available": available, 
+            "killed": killed, 
+            "uu": uu, 
+            "ou": ou, 
+            "oo": oo
+        }
 
     def count_state_vector(self, player):
         """ Return a vector with the lengths of all state vector lists of the input player. """
 
-        return list(map(len, self.state_vectors[player]))
+        return list(map(len, self.state_vectors[player].values()))
 
     def line_type(self, line):
         """ Return the line type (row, column or diagonal) from the index of the line. """
