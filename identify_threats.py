@@ -1,3 +1,5 @@
+from functools import reduce
+
 from n_dim_matrix import n_dim_matrix
 
 X = 2
@@ -17,8 +19,10 @@ UNOCCUPIED = 5
 
 class State:
 
-    def __init__(self, board, calc_vectors=True):
+    def __init__(self, board, next_to_move=X, calc_vectors=True):
+        
         self.board = board
+        self.next_to_move = next_to_move
 
         # TODO refactor
         self.state_vectors = {}
@@ -28,7 +32,7 @@ class State:
             self.calc_state_vector(X)
             self.calc_state_vector(O)
 
-    def _other_player(self, player):
+    def other_player(self, player):
         """ Take a player and returns the other player(opponent). """
 
         return O if player == X else X 
@@ -100,7 +104,7 @@ class State:
     def calc_state_vector(self, player):
         """ Calculate and store the state vector for a player. """
 
-        other_player = self._other_player(player)
+        other_player = self.other_player(player)
 
         unoccupied = []
         occupied = []
@@ -207,7 +211,7 @@ class State:
     def available_lines(self, player):
         """ Return list of all lines available to a player. """
 
-        other_player = self._other_player(player)
+        other_player = self.other_player(player)
         indices = [i for i in range(NUM_LINES)]
 
         return list(filter(lambda x: x is not None ,map(lambda l, i: i if l % other_player != 0 else None, self.line_prods, indices)))
@@ -230,10 +234,15 @@ class State:
         
         return None if len(intersection_set) == 0 else intersection_set.pop()
 
+    def empty_cells(self):
+        """ Return list of all empty cells on board. """
+
+        return list(reduce(lambda x, y: x + y, [self.empty_cells_in_line(row) for row in range(BOARD_SIZE)], []))
+
     def line_poses_potential_threat(self, line, player):
         """ Return true if player poses potential threat on the line. """
 
-        other_player = self._other_player(player)
+        other_player = self.other_player(player)
         return self.line_prods[line] % other_player != 0 and self.line_prods[line] // player == 1
 
     def potential_threats(self, player):
@@ -263,6 +272,32 @@ class State:
                         potential_double_threats.append((line1, line2, intersection_cell))
 
         return potential_double_threats
+
+    def possible_moves(self):
+        """ Return all possible moves for the current player. """
+
+        player = self.next_to_move
+        other_player = self.other_player(player)
+
+        player_count_state_vector = self.count_state_vector(player)
+        other_player_count_state_vector = self.count_state_vector(other_player)
+
+        player_attack_count = player_count_state_vector[2]
+
+        if player_attack_count > 0:
+
+            # return winning move if available
+            return [self.state_vectors[player]["attack"][0][1]]
+
+        other_player_attack_count = other_player_count_state_vector[2]
+
+        if other_player_attack_count > 0:
+
+            # stop threats from opponent
+            return [self.state_vectors[other_player]["attack"][0][1]]
+
+        # otherwise return all empty cells
+        return self.empty_cells()
 
 def empty_state():
     """ Create a blank game state. """
