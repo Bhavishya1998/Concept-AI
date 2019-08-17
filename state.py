@@ -24,7 +24,7 @@ class State:
         self.board = board
         self.next_to_move = next_to_move
 
-        # TODO refactor
+        self.win_probs = {X: None, O: None}
         self.state_vectors = {}
 
         if calc_vectors:
@@ -298,6 +298,34 @@ class State:
 
         # otherwise return all empty cells
         return self.empty_cells()
+
+    def assign_probs(self):
+        """
+        Assign winning probabilities if a decision is certain, otherwise assign None.
+        """
+
+        player = self.next_to_move
+        other_player = self.other_player(player)
+
+        player_count_state_vector = self.count_state_vector(player)
+        other_player_count_state_vector = self.count_state_vector(other_player)
+
+        count_oo = player_count_state_vector[7]
+        if count_oo > 0:
+            # a player wins if he is about to play an o-o intersection
+            self.win_probs[player] = 1.0
+            self.win_probs[other_player] = 0.0
+            return
+
+        player_count_available = player_count_state_vector[3]
+        if player_count_available <= 2:
+            # if a player has less than three available lines then he can't win
+            self.win_probs[player] = 0.0
+
+        other_player_count_available = other_player_count_state_vector[3]
+        if other_player_count_available <= 3:
+            # if a player has less than 4 available lines and the opponent is about to play, then he can't win
+            self.win_probs[other_player] = 0.0
 
 def empty_state():
     """ Create a blank game state. """
