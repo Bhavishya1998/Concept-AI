@@ -1,4 +1,4 @@
-from identify_threats import State, X, O, EMPTY
+from state import State, X, O, EMPTY
 import unittest
 
 class StateTest(unittest.TestCase):
