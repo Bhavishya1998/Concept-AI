@@ -32,6 +32,9 @@ class State:
             self.calc_state_vector(X)
             self.calc_state_vector(O)
 
+            # NOTE should this be called?
+            self.assign_probs()
+
     def other_player(self, player):
         """ Take a player and returns the other player(opponent). """
 
@@ -214,7 +217,7 @@ class State:
         other_player = self.other_player(player)
         indices = [i for i in range(NUM_LINES)]
 
-        return list(filter(lambda x: x is not None ,map(lambda l, i: i if l % other_player != 0 else None, self.line_prods, indices)))
+        return list(filter(lambda x: x is not None , map(lambda l, i: i if l % other_player != 0 else None, self.line_prods, indices)))
 
     def empty_cells_in_line(self, line):
         """ Return list containing all empty cells in a line. """
@@ -326,8 +329,3 @@ class State:
         if other_player_count_available <= 3:
             # if a player has less than 4 available lines and the opponent is about to play, then he can't win
             self.win_probs[other_player] = 0.0
-
-def empty_state():
-    """ Create a blank game state. """
-
-    return State(n_dim_matrix((BOARD_SIZE, BOARD_SIZE), fill=EMPTY))
