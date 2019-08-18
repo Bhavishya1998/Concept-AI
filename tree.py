@@ -34,20 +34,26 @@ class Node:
         # TODO define value function
         return False
 
-    def generate_subtree(self):
-        """ Recursively generate the subtree below this node and return the result. """
+    def generate_subtree(self, depth=None):
+        """
+        Recursively generate the subtree below this node of the desired depth and return the result. 
+        A depth of None generates the entire subtree.
+        """
 
-        if self.assured_result():
-            self.value = self.assured_value()
+        if depth is not None and depth > 0:
+            if self.assured_result():
+                self.value = self.assured_value()
 
+            else:
+                self.generate_children()
+
+                # NOTE should children_values be saved?
+                children_values = {}
+                for move in self.children:
+                    children_values[move] = self.children[move].generate_subtree((None if depth is None else depth-1))
+
+                self.value = self.calculate_value(children_values)
+
+            return self.value
         else:
-            self.generate_children()
-
-            # NOTE should children_values be saved?
-            children_values = {}
-            for move in self.children:
-                children_values[move] = self.children[move].generate_subtree()
-
-            self.value = self.calculate_value(children_values)
-
-        return self.value
+            return None
