@@ -23,6 +23,7 @@ class State:
         
         self.board = board
         self.next_to_move = next_to_move
+        # TODO if next_to_move is None, infer from board, assuming that X goes first
 
         self.win_probs = {X: None, O: None}
         self.state_vectors = {}
@@ -313,8 +314,16 @@ class State:
         player_count_state_vector = self.count_state_vector(player)
         other_player_count_state_vector = self.count_state_vector(other_player)
 
+        count_other_player_attacks = other_player_count_state_vector[2]
+
         count_oo = player_count_state_vector[7]
-        if count_oo > 0:
+        # TODO Can the condition be improved? 
+        if count_oo > 0 and \
+           (count_other_player_attacks == 0 or \
+              (count_other_player_attacks == 1 and \
+                  self.state_vectors[other_player]["attack"][0][1] in [intersection[2] for intersection in self.state_vectors[player]["oo"]])):
+              # player might be forced into playing a double threat, so that must be checked too
+
             # a player wins if he is about to play an o-o intersection
             self.win_probs[player] = 1.0
             self.win_probs[other_player] = 0.0

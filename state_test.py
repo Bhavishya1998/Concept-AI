@@ -236,5 +236,18 @@ class StateTest(unittest.TestCase):
         state = State(board, next_to_move=O)
         self.assertEqual(state.possible_moves(), [(0, 0), (1, 0), (2, 0), (0, 1), (2, 1), (0, 2), (1, 2), (2, 2)])
 
+    def test_win_probs(self):
+        
+        board = [
+            [EMPTY, O, EMPTY],
+            [O, X, EMPTY],
+            [EMPTY, X, EMPTY]
+        ]
+        state = State(board, next_to_move=X)
+        self.assertEqual(state.win_probs[X], 1.0)
+        self.assertEqual(state.win_probs[O], 0.0)
+
+        # TODO add more tests
+
 if __name__ == "__main__":
     unittest.main()
