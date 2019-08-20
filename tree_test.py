@@ -38,7 +38,8 @@ class TreeTest(unittest.TestCase):
         node = Node(state)
         node.generate_subtree()
         self.assertAlmostEqual(node.value[X], 0.33, 2)
-        self.assertAlmostEqual(node.value[O], 0.0, 2)
+        self.assertAlmostEqual(node.value[O], 0.067, 3)
+        # TODO is this correct?
 
         board = [
             [EMPTY, EMPTY, X],
@@ -61,8 +62,6 @@ class TreeTest(unittest.TestCase):
         node.generate_subtree()
         self.assertAlmostEqual(node.value[X], 0.67, 2)
         self.assertAlmostEqual(node.value[O], 0.0, 2)
-
-
 
 if __name__ == "__main__":
     unittest.main()

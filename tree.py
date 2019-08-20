@@ -58,9 +58,9 @@ class Node:
 
             # DEBUG
             # if self.value[X] != 0.0 and self.value[O] != 0.0:
-            #     print_board(self.state)
-            #     print(self.value)
-            #     print()
+            # print_board(self.state)
+            # print(self.value)
+            # print()
 
             return self.value
         else:

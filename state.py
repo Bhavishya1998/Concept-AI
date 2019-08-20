@@ -1,6 +1,5 @@
 from functools import reduce
-
-from n_dim_matrix import n_dim_matrix
+import pandas as pd
 
 X = 2
 O = 3
@@ -19,14 +18,27 @@ UNOCCUPIED = 5
 
 class State:
 
-    def __init__(self, board, next_to_move=X, calc_vectors=True):
+    def __init__(self, board, next_to_move=None, calc_vectors=True):
         
         self.board = board
-        self.next_to_move = next_to_move
-        # TODO if next_to_move is None, infer from board, assuming that X goes first
+        if next_to_move is None:
+            # if next_to_move is None, infer the next player from the board, assuming that  goes first
+            self.next_to_move = X if len(self.empty_cells()) % 2 == 1 else O
+        else:
+            self.next_to_move = next_to_move
 
         self.win_probs = {X: None, O: None}
         self.state_vectors = {}
+        self.count_state_vectors = pd.DataFrame(columns=[X, O], index=[
+            "unoccupied", 
+            "occupied", 
+            "attack", 
+            "available", 
+            "killed",
+            "uu", 
+            "ou", 
+            "oo"
+        ])
 
         if calc_vectors:
             self._calc_products()
@@ -167,11 +179,7 @@ class State:
             "ou": ou, 
             "oo": oo
         }
-
-    def count_state_vector(self, player):
-        """ Return a vector with the lengths of all state vector lists of the input player. """
-
-        return list(map(len, self.state_vectors[player].values()))
+        self.count_state_vectors[player] = [len(value) for value in self.state_vectors[player].values()]
 
     def line_type(self, line):
         """ Return the line type (row, column or diagonal) from the index of the line. """
@@ -280,20 +288,21 @@ class State:
     def possible_moves(self):
         """ Return all possible moves for the current player. """
 
+        # TODO treat mirror states as one
         player = self.next_to_move
         other_player = self.other_player(player)
 
-        player_count_state_vector = self.count_state_vector(player)
-        other_player_count_state_vector = self.count_state_vector(other_player)
+        player_count_state_vector = self.count_state_vectors[player]
+        other_player_count_state_vector = self.count_state_vectors[other_player]
 
-        player_attack_count = player_count_state_vector[2]
+        player_attack_count = player_count_state_vector["attack"]
 
         if player_attack_count > 0:
 
             # return winning move if available
             return [self.state_vectors[player]["attack"][0][1]]
 
-        other_player_attack_count = other_player_count_state_vector[2]
+        other_player_attack_count = other_player_count_state_vector["attack"]
 
         if other_player_attack_count > 0:
 
@@ -311,12 +320,12 @@ class State:
         player = self.next_to_move
         other_player = self.other_player(player)
 
-        player_count_state_vector = self.count_state_vector(player)
-        other_player_count_state_vector = self.count_state_vector(other_player)
+        player_count_state_vector = self.count_state_vectors[player]
+        other_player_count_state_vector = self.count_state_vectors[other_player]
 
-        count_other_player_attacks = other_player_count_state_vector[2]
+        count_other_player_attacks = other_player_count_state_vector["attack"]
 
-        count_oo = player_count_state_vector[7]
+        count_oo = player_count_state_vector["oo"]
         # TODO Can the condition be improved? 
         if count_oo > 0 and \
            (count_other_player_attacks == 0 or \
@@ -329,12 +338,12 @@ class State:
             self.win_probs[other_player] = 0.0
             return
 
-        player_count_available = player_count_state_vector[3]
+        player_count_available = player_count_state_vector["available"]
         if player_count_available <= 2:
             # if a player has less than three available lines then he can't win
             self.win_probs[player] = 0.0
 
-        other_player_count_available = other_player_count_state_vector[3]
+        other_player_count_available = other_player_count_state_vector["available"]
         if other_player_count_available <= 3:
             # if a player has less than 4 available lines and the opponent is about to play, then he can't win
             self.win_probs[other_player] = 0.0
