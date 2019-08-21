@@ -162,8 +162,8 @@ class StateTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(list(state.count_state_vectors[X]), [1, 2, 0, 3, 5, 0, 2, 0])
-        self.assertEqual(list(state.count_state_vectors[O]), [1, 2, 0, 3, 5, 0, 1, 1])
+        self.assertEqual(list(state.count_state_vectors.loc[X]), [1, 2, 0, 3, 5, 0, 2, 0])
+        self.assertEqual(list(state.count_state_vectors.loc[O]), [1, 2, 0, 3, 5, 0, 1, 1])
 
         board = [
             [X, O, EMPTY],
@@ -171,8 +171,8 @@ class StateTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(list(state.count_state_vectors[X]), [1, 2, 1, 3, 5, 0, 2, 0])
-        self.assertEqual(list(state.count_state_vectors[O]), [1, 0, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(list(state.count_state_vectors.loc[X]), [1, 2, 1, 3, 5, 0, 2, 0])
+        self.assertEqual(list(state.count_state_vectors.loc[O]), [1, 0, 0, 1, 7, 0, 0, 0])
 
         board = [
             [EMPTY, O, X],
@@ -180,8 +180,8 @@ class StateTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(list(state.count_state_vectors[X]), [0, 3, 0, 3, 5, 0, 0, 2])
-        self.assertEqual(list(state.count_state_vectors[O]), [0, 1, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(list(state.count_state_vectors.loc[X]), [0, 3, 0, 3, 5, 0, 0, 2])
+        self.assertEqual(list(state.count_state_vectors.loc[O]), [0, 1, 0, 1, 7, 0, 0, 0])
 
         board = [
             [EMPTY, O, EMPTY],
@@ -189,8 +189,8 @@ class StateTest(unittest.TestCase):
             [O, X, EMPTY]
         ]
         state = State(board)
-        self.assertEqual(list(state.count_state_vectors[X]), [0, 1, 0, 1, 7, 0, 0, 0])
-        self.assertEqual(list(state.count_state_vectors[O]), [0, 2, 0, 2, 6, 0, 0, 1])
+        self.assertEqual(list(state.count_state_vectors.loc[X]), [0, 1, 0, 1, 7, 0, 0, 0])
+        self.assertEqual(list(state.count_state_vectors.loc[O]), [0, 2, 0, 2, 6, 0, 0, 1])
 
     def test_empty_cells(self):
         

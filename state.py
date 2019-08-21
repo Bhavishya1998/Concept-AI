@@ -29,7 +29,7 @@ class State:
 
         self.win_probs = {X: None, O: None}
         self.state_vectors = {}
-        self.count_state_vectors = pd.DataFrame(columns=[X, O], index=[
+        self.count_state_vectors = pd.DataFrame(index=[X, O], columns=[
             "unoccupied", 
             "occupied", 
             "attack", 
@@ -179,7 +179,7 @@ class State:
             "ou": ou, 
             "oo": oo
         }
-        self.count_state_vectors[player] = [len(value) for value in self.state_vectors[player].values()]
+        self.count_state_vectors.loc[player] = [len(value) for value in self.state_vectors[player].values()]
 
     def line_type(self, line):
         """ Return the line type (row, column or diagonal) from the index of the line. """
@@ -292,8 +292,8 @@ class State:
         player = self.next_to_move
         other_player = self.other_player(player)
 
-        player_count_state_vector = self.count_state_vectors[player]
-        other_player_count_state_vector = self.count_state_vectors[other_player]
+        player_count_state_vector = self.count_state_vectors.loc[player]
+        other_player_count_state_vector = self.count_state_vectors.loc[other_player]
 
         player_attack_count = player_count_state_vector["attack"]
 
@@ -320,8 +320,8 @@ class State:
         player = self.next_to_move
         other_player = self.other_player(player)
 
-        player_count_state_vector = self.count_state_vectors[player]
-        other_player_count_state_vector = self.count_state_vectors[other_player]
+        player_count_state_vector = self.count_state_vectors.loc[player]
+        other_player_count_state_vector = self.count_state_vectors.loc[other_player]
 
         count_other_player_attacks = other_player_count_state_vector["attack"]
 

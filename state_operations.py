@@ -19,4 +19,3 @@ def next_state(state: State, move):
     new_board[y][x] = state.next_to_move
 
     return State(new_board, next_to_move=next_player)
-
