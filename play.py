@@ -22,7 +22,7 @@ def user_select_token():
 def game():
     def play(node: Node):
 
-        print_board(node.state)
+        print_board(node.state, flip_vertical=node.flip_vertical, flip_horizontal=node.flip_horizontal)
 
         if node.assured_result():
             print("Game Over.")
