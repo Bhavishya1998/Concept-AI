@@ -5,9 +5,11 @@ from debug import print_board
 
 class Node:
 
-    def __init__(self, state: State):
+    def __init__(self, state: State, flip_vertical=False, flip_horizontal=False):
         self.state = state
         self.children = {}
+        self.flip_vertical = flip_vertical
+        self.flip_horizontal = flip_horizontal
         self.value = None
 
     def generate_children(self):
@@ -67,3 +69,19 @@ class Node:
 
             # TODO this makes depth unusable
             return None
+
+    def select_next(self):
+        """ Return the best possible move based on the defined selection algorithm. """
+
+        player = self.state.next_to_move
+        other_player = self.state.other_player(player)
+
+        moves = list(self.children.keys())
+        
+        best_move = moves[0]
+        for move in moves:
+            if self.children[move].value[player] - self.children[move].value[other_player] > \
+             self.children[best_move].value[player] - self.children[best_move].value[other_player]:
+                best_move = move
+
+        return best_move
