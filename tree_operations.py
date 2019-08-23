@@ -29,7 +29,7 @@ def next_node(node: Node, move):
     elif node.state.vertical_symmetry and node.state._reflection_in_vertical(adjusted_move) in node.children:
         adjusted_move = node.state._reflection_in_vertical(adjusted_move)
         child_node = node.children[adjusted_move]
-        child_node.flip_vertical = node.flip_vertical
+        child_node.flip_horizontal = node.flip_horizontal
         child_node.flip_vertical = not node.flip_vertical 
         return node.children[adjusted_move]
     elif node.state.horizontal_symmetry and node.state.vertical_symmetry and \
@@ -37,7 +37,7 @@ def next_node(node: Node, move):
         
         adjusted_move = node.state._reflection_in_horizontal(node.state._reflection_in_vertical(adjusted_move))
         child_node = node.children[adjusted_move]
-        child_node.flip_vertical = not node.flip_vertical
+        child_node.flip_horizontal = not node.flip_horizontal
         child_node.flip_vertical = not node.flip_vertical 
         return node.children[adjusted_move]
     else:
