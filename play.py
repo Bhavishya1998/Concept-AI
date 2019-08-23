@@ -7,8 +7,8 @@ from state_operations import empty_state
 
 def player_move(node: Node):
     cell = input("Enter cell: ")
-    move = tuple([int(coord) for coord in cell.split(" ")])
-    return next_node(node, move)
+    y, x = tuple([int(coord) for coord in cell.split(" ")])
+    return next_node(node, (x, y))
 
 def ai_move(node: Node):
     move = node.select_next()
