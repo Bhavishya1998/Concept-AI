@@ -6,13 +6,18 @@ from debug import print_board
 from state_operations import empty_state
 
 def player_move(node: Node):
+
+    if len(node.children) == 0:
+        # TODO generate just the node needed?
+        node.generate_children()
+        
     cell = input("Enter cell: ")
     y, x = tuple([int(coord) for coord in cell.split(" ")])
-    return next_node(node, (x, y))
+    return next_node(node, (x, y), pre_adjust_move=True)
 
 def ai_move(node: Node):
     move = node.select_next()
-    return next_node(node, move)
+    return next_node(node, move, pre_adjust_move=False)
 
 def user_select_token():
 
@@ -24,7 +29,7 @@ def game():
 
         print_board(node.state, flip_vertical=node.flip_vertical, flip_horizontal=node.flip_horizontal)
 
-        if node.assured_result():
+        if node.state.game_over():
             print("Game Over.")
             return
         

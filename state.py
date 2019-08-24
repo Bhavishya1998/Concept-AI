@@ -347,14 +347,14 @@ class State:
         if player_attack_count > 0:
 
             # return winning move if available
-            return [self.state_vectors[player]["attack"][0][1]]
+            return [attack[1] for attack in self.state_vectors[player]["attack"]]
 
         other_player_attack_count = other_player_count_state_vector["attack"]
 
         if other_player_attack_count > 0:
 
             # stop threats from opponent
-            return [self.state_vectors[other_player]["attack"][0][1]]
+            return [attack[1] for attack in self.state_vectors[other_player]["attack"]]
 
         # TODO refactor
         # Cells which can be ignored because of symmetry. Only one mirrored cell is considered.
@@ -413,3 +413,20 @@ class State:
         if other_player_count_available <= 3:
             # if a player has less than 4 available lines and the opponent is about to play, then he can't win
             self.win_probs[other_player] = 0.0
+
+    def game_over(self):
+        """ Return True if the game is over, otherwise False. """
+
+        x_win = X ** BOARD_SIZE
+        o_win = O ** BOARD_SIZE
+
+        for line_prod in self.line_prods:
+            if line_prod == x_win or line_prod == o_win:
+                # someone won
+                return True
+
+        if len(self.empty_cells()) == 0:
+            # the board is full and no one won, a draw
+            return True
+        
+        return False

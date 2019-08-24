@@ -70,8 +70,28 @@ class Node:
             # TODO this makes depth unusable
             return None
 
-    def select_next(self):
-        """ Return the best possible move based on the defined selection algorithm. """
+    def select_next_assured(self):
+        """ Return the next move if the game result is assured. """
+
+        
+        player = self.state.next_to_move
+        other_player = self.state.other_player(player)
+
+        if self.state.count_state_vectors.loc[player]["attack"] > 0:
+            # 1. play own attack
+            return self.state.state_vectors[player]["attack"][0][1]
+        elif self.state.count_state_vectors.loc[other_player]["attack"] > 0:
+            # 2. stop opponent attack
+            return self.state.state_vectors[other_player]["attack"][0][1]
+        elif self.state.count_state_vectors.loc[player]["oo"] > 0:
+            # 3. play o-o
+            return self.state.state_vectors[player]["oo"][0][2]
+        else:
+            # 4. random
+            return self.state.empty_cells()[0]
+
+    def select_next_unassured(self):
+        """ Return the next move if the game result is not assured yet. """
 
         player = self.state.next_to_move
         other_player = self.state.other_player(player)
@@ -85,3 +105,16 @@ class Node:
                 best_move = move
 
         return best_move
+
+    def select_next(self):
+        """ Return the best possible move based on the defined selection algorithm. """
+
+        if self.assured_result():
+
+            # TODO Instead, just create the single node that will be played? 
+            # if result is assured, the node won't have children
+            self.generate_children()
+            return self.select_next_assured()
+        else:
+            return self.select_next_unassured()
+
