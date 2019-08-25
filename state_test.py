@@ -234,7 +234,8 @@ class StateTest(unittest.TestCase):
             [EMPTY, EMPTY, EMPTY]
         ]
         state = State(board, next_to_move=O)
-        self.assertEqual(state.possible_moves(), [(0, 0), (1, 0), (2, 0), (0, 1), (2, 1), (0, 2), (1, 2), (2, 2)])
+        self.assertEqual(state.possible_moves(), [(0, 0), (1, 0), (0, 1)])
+        # NOTE (0, 1) is included. Is there a way to disinclude in and still make this function work for states other than this one?
 
     def test_win_probs(self):
         
@@ -248,6 +249,44 @@ class StateTest(unittest.TestCase):
         self.assertEqual(state.win_probs[O], 0.0)
 
         # TODO add more tests
+
+    def test_symmetry(self):
+
+        board = [
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]
+        ]
+        state = State(board)
+        self.assertTrue(state._has_vertical_symmetry())
+        self.assertTrue(state._has_horizontal_symmetry())
+
+        board = [
+            [EMPTY, X, EMPTY],
+            [O, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]
+        ]
+        state = State(board)
+        self.assertFalse(state._has_vertical_symmetry())
+        self.assertFalse(state._has_horizontal_symmetry())
+
+        board = [
+            [EMPTY, O, EMPTY],
+            [X, EMPTY, X],
+            [EMPTY, EMPTY, EMPTY]
+        ]
+        state = State(board)
+        self.assertTrue(state._has_vertical_symmetry())
+        self.assertFalse(state._has_horizontal_symmetry())
+
+        board = [
+            [X, O, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [X, O, EMPTY]
+        ]
+        state = State(board)
+        self.assertFalse(state._has_vertical_symmetry())
+        self.assertTrue(state._has_horizontal_symmetry())
 
 if __name__ == "__main__":
     unittest.main()

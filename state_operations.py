@@ -5,7 +5,7 @@ from n_dim_matrix import n_dim_matrix
 def empty_state():
     """ Create a blank game state. """
 
-    return State(n_dim_matrix((BOARD_SIZE, BOARD_SIZE), fill=EMPTY))
+    return State(n_dim_matrix((BOARD_SIZE, BOARD_SIZE), fill=EMPTY), next_to_move=X)
 
 def next_state(state: State, move):
     """ Play 'move' on 'state' and return the next state. """

@@ -5,9 +5,11 @@ from debug import print_board
 
 class Node:
 
-    def __init__(self, state: State):
+    def __init__(self, state: State, flip_vertical=False, flip_horizontal=False):
         self.state = state
         self.children = {}
+        self.flip_vertical = flip_vertical
+        self.flip_horizontal = flip_horizontal
         self.value = None
 
     def generate_children(self):
@@ -67,3 +69,52 @@ class Node:
 
             # TODO this makes depth unusable
             return None
+
+    def select_next_assured(self):
+        """ Return the next move if the game result is assured. """
+
+        
+        player = self.state.next_to_move
+        other_player = self.state.other_player(player)
+
+        if self.state.count_state_vectors.loc[player]["attack"] > 0:
+            # 1. play own attack
+            return self.state.state_vectors[player]["attack"][0][1]
+        elif self.state.count_state_vectors.loc[other_player]["attack"] > 0:
+            # 2. stop opponent attack
+            return self.state.state_vectors[other_player]["attack"][0][1]
+        elif self.state.count_state_vectors.loc[player]["oo"] > 0:
+            # 3. play o-o
+            return self.state.state_vectors[player]["oo"][0][2]
+        else:
+            # 4. random
+            return self.state.empty_cells()[0]
+
+    def select_next_unassured(self):
+        """ Return the next move if the game result is not assured yet. """
+
+        player = self.state.next_to_move
+        other_player = self.state.other_player(player)
+
+        moves = list(self.children.keys())
+        
+        best_move = moves[0]
+        for move in moves:
+            if self.children[move].value[player] - self.children[move].value[other_player] > \
+             self.children[best_move].value[player] - self.children[best_move].value[other_player]:
+                best_move = move
+
+        return best_move
+
+    def select_next(self):
+        """ Return the best possible move based on the defined selection algorithm. """
+
+        if self.assured_result():
+
+            # TODO Instead, just create the single node that will be played? 
+            # if result is assured, the node won't have children
+            self.generate_children()
+            return self.select_next_assured()
+        else:
+            return self.select_next_unassured()
+

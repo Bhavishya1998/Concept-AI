@@ -40,6 +40,9 @@ class State:
             "oo"
         ])
 
+        self.horizontal_symmetry = self._has_horizontal_symmetry()
+        self.vertical_symmetry = self._has_vertical_symmetry()
+
         if calc_vectors:
             self._calc_products()
             self.calc_state_vector(X)
@@ -47,6 +50,49 @@ class State:
 
             # NOTE should this be called?
             self.assign_probs()
+
+    def _reflection_in_vertical(self, cell):
+        """ Return the reflection of cell in the vertical line bisecting the board. """
+
+        x, y = cell
+        return BOARD_SIZE - x - 1, y
+
+    def _reflection_in_horizontal(self, cell):
+        """ Return the reflection of cell in the horizontal line bisecting the board. """
+
+        x, y = cell
+        return x, BOARD_SIZE - y - 1
+
+    def _has_vertical_symmetry(self):
+        """ Return True if the board is symmetrical about the vertical line bisecting it. """
+
+        for y in range(BOARD_SIZE):
+            for x in range(BOARD_SIZE // 2):
+                opposite_x, opposite_y = self._reflection_in_vertical((x, y))
+                if self.board[y][x] != self.board[opposite_y][opposite_x]:
+                    return False
+
+        return True
+
+    def _has_horizontal_symmetry(self):
+        """ Return True if the board is symmetrical about the horizontal line bisecting it. """
+
+        for y in range(BOARD_SIZE // 2):
+            for x in range(BOARD_SIZE):
+                opposite_x, opposite_y = self._reflection_in_horizontal((x, y))
+                if self.board[y][x] != self.board[opposite_y][opposite_x]:
+                    return False
+
+        return True
+
+    def _other_corners(self, corner_cell):
+        """ Take a corner cell and return a list of the other three corner cells. """
+
+        return [
+            self._reflection_in_horizontal(corner_cell),
+            self._reflection_in_vertical(corner_cell),
+            self._reflection_in_horizontal(self._reflection_in_vertical(corner_cell))
+        ]
 
     def other_player(self, player):
         """ Take a player and returns the other player(opponent). """
@@ -297,20 +343,40 @@ class State:
 
         player_attack_count = player_count_state_vector["attack"]
 
+        # NOTE will symmetry analysis mess these up?
         if player_attack_count > 0:
 
             # return winning move if available
-            return [self.state_vectors[player]["attack"][0][1]]
+            return [attack[1] for attack in self.state_vectors[player]["attack"]]
 
         other_player_attack_count = other_player_count_state_vector["attack"]
 
         if other_player_attack_count > 0:
 
             # stop threats from opponent
-            return [self.state_vectors[other_player]["attack"][0][1]]
+            return [attack[1] for attack in self.state_vectors[other_player]["attack"]]
 
-        # otherwise return all empty cells
-        return self.empty_cells()
+        # TODO refactor
+        # Cells which can be ignored because of symmetry. Only one mirrored cell is considered.
+        if self.horizontal_symmetry and self.vertical_symmetry:
+            # if the board has both horizontal and vertical symmetry, then all corner cells are equivalent
+            symmetry_ignore_cells = self._other_corners((0, 0))
+        else:
+            symmetry_ignore_cells = []
+
+        possib_cells = []
+
+        for cell in self.empty_cells():
+            if cell not in symmetry_ignore_cells:
+                if self.vertical_symmetry:
+                    symmetry_ignore_cells.append(self._reflection_in_vertical(cell))
+                if self.horizontal_symmetry:
+                    symmetry_ignore_cells.append(self._reflection_in_horizontal(cell))
+
+                possib_cells.append(cell)
+
+        return possib_cells
+                    
 
     def assign_probs(self):
         """
@@ -326,7 +392,7 @@ class State:
         count_other_player_attacks = other_player_count_state_vector["attack"]
 
         count_oo = player_count_state_vector["oo"]
-        # TODO Can the condition be improved? 
+        # TODO Can this condition be improved? 
         if count_oo > 0 and \
            (count_other_player_attacks == 0 or \
               (count_other_player_attacks == 1 and \
@@ -347,3 +413,20 @@ class State:
         if other_player_count_available <= 3:
             # if a player has less than 4 available lines and the opponent is about to play, then he can't win
             self.win_probs[other_player] = 0.0
+
+    def game_over(self):
+        """ Return True if the game is over, otherwise False. """
+
+        x_win = X ** BOARD_SIZE
+        o_win = O ** BOARD_SIZE
+
+        for line_prod in self.line_prods:
+            if line_prod == x_win or line_prod == o_win:
+                # someone won
+                return True
+
+        if len(self.empty_cells()) == 0:
+            # the board is full and no one won, a draw
+            return True
+        
+        return False
