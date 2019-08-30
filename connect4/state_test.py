@@ -25,15 +25,25 @@ class StateTest(unittest.TestCase):
         
         s = State(None, None)
 
-        self.assertEqual(s._r2l_diag_lines_of_cell((2, 2)), [46, 47])
-        self.assertEqual(s._r2l_diag_lines_of_cell((0, 3)), [45])
-        self.assertEqual(s._r2l_diag_lines_of_cell((4, 0)), [47])
-        self.assertEqual(s._r2l_diag_lines_of_cell((5, 3)), [56])
-        self.assertEqual(s._r2l_diag_lines_of_cell((3, 3)), [51, 52, 53])
-        self.assertEqual(s._r2l_diag_lines_of_cell((0, 0)), [])
-        self.assertEqual(s._r2l_diag_lines_of_cell((0, 2)), [])
-        self.assertEqual(s._r2l_diag_lines_of_cell((5, 4)), [])
-        self.assertEqual(s._r2l_diag_lines_of_cell((5, 6)), [])
+        # right to left
+        self.assertEqual(s._diag_lines_of_cell((2, 2), r2l=True), [46, 47])
+        self.assertEqual(s._diag_lines_of_cell((0, 3), r2l=True), [45])
+        self.assertEqual(s._diag_lines_of_cell((4, 0), r2l=True), [47])
+        self.assertEqual(s._diag_lines_of_cell((5, 3), r2l=True), [56])
+        self.assertEqual(s._diag_lines_of_cell((3, 3), r2l=True), [51, 52, 53])
+        self.assertEqual(s._diag_lines_of_cell((0, 0), r2l=True), [])
+        self.assertEqual(s._diag_lines_of_cell((0, 2), r2l=True), [])
+        self.assertEqual(s._diag_lines_of_cell((5, 4), r2l=True), [])
+        self.assertEqual(s._diag_lines_of_cell((5, 6), r2l=True), [])
+
+        # left to right
+        self.assertEqual(s._diag_lines_of_cell((1, 3), r2l=False), [58, 59])
+        self.assertEqual(s._diag_lines_of_cell((0, 0), r2l=False), [63])
+        self.assertEqual(s._diag_lines_of_cell((2, 2), r2l=False), [63, 64, 65])
+        self.assertEqual(s._diag_lines_of_cell((4, 4), r2l=False), [64, 65])
+        self.assertEqual(s._diag_lines_of_cell((2, 0), r2l=False), [68])
+        self.assertEqual(s._diag_lines_of_cell((0, 6), r2l=False), [])
+        self.assertEqual(s._diag_lines_of_cell((5, 2), r2l=False), [])
 
 if __name__ == "__main__":
     unittest.main()
