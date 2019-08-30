@@ -112,4 +112,9 @@ class State:
         return diag_lines
 
     def lines_of_cell(self, cell):
-        pass
+        """ Return all lines passing through 'cell'. """
+
+        return self._row_lines_of_cell(cell) + \
+            self._col_lines_of_cell(cell) + \
+            self._diag_lines_of_cell(cell, True) + \
+            self._diag_lines_of_cell(cell, False)
