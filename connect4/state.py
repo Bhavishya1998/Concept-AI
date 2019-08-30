@@ -51,5 +51,60 @@ class State:
 
         return col_lines
 
+    def _r2l_diag_top_row(self, diagonal):
+        """ Return the top row of diagonal 'diagonal'. """
+
+        return max(0, diagonal - 3)
+
+    def _num_lines_in_diag(self, diagonal):
+        """ Return the number of lines in 'diagonal'. """
+
+        if diagonal in [0, 5]:
+            return 1
+        elif diagonal in [1, 4]:
+            return 2
+        elif diagonal in [2, 3]:
+            return 3
+        else:
+            # should not be reached for legal diagonal
+            return 0
+
+    def _diagonal_first_last_lines(self, diagonal, r2l: bool):
+        """ Return tuple of first and last line of diagonal. """
+
+        if r2l:
+            # right to left diagonal
+            start_line = NUM_ROW_LINES + NUM_COL_LINES + ((diagonal+1)*diagonal//2 if diagonal <= 3 else 9 + 2*(diagonal-4))
+            end_line = start_line + self._num_lines_in_diag(diagonal) - 1
+        else:
+            # TODO finish
+            start_line = None
+            end_line = None
+            # left to right diagonal
+
+        return start_line, end_line
+
+    def _r2l_diag_lines_of_cell(self, cell):
+        """ Return list of all right to left diagonal lines that 'cell' belongs to. """
+
+        r, c = cell
+        if r + c < 3 or r + c > 8:
+            # no diagonal lines pass through the cell
+            return []
+
+        diagonal = r + c - 3
+        start_line, end_line = self._diagonal_first_last_lines(diagonal, r2l=True)
+
+        diag_lines = []
+
+        top_row = self._r2l_diag_top_row(diagonal)
+
+        for line in range(start_line, end_line+1):
+            row_shift = line - start_line
+            if top_row + row_shift <= r and r <= top_row + row_shift + 3:
+                diag_lines.append(line)
+
+        return diag_lines
+
     def lines_of_cell(self, cell):
         pass
