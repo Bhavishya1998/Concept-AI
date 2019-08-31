@@ -118,3 +118,36 @@ class State:
             self._col_lines_of_cell(cell) + \
             self._diag_lines_of_cell(cell, True) + \
             self._diag_lines_of_cell(cell, False)
+
+    def _first_cell_of_row(self, row):
+        """ Return first cell of row. """
+
+        return row // ROW_LINES_IN_ROW, row % ROW_LINES_IN_ROW
+
+    def _first_cell_of_col(self, col):
+        """ Return first cell of column. """
+
+        adjusted_col = col - NUM_ROW_LINES
+        return adjusted_col % COL_LINES_IN_COL, adjusted_col // COL_LINES_IN_COL
+
+    def line_to_cells(self, line):
+        """ Return list of all cells of a line. """
+
+        if line >= NUM_ROW_LINES + NUM_COL_LINES + NUM_DIAGS_ONE_SIDE:
+            # l2r diag
+            return None
+        elif line >= NUM_ROW_LINES + NUM_COL_LINES:
+            # r2l diag
+            return None
+        elif line >= NUM_ROW_LINES:
+            # col
+            first_cell_r, first_cell_c = self._first_cell_of_col(line)
+            shift_r = 1
+            shift_c = 0
+        else:
+            # row
+            first_cell_r, first_cell_c = self._first_cell_of_row(line)
+            shift_r = 0
+            shift_c = 1
+            
+        return [(first_cell_r + i*shift_r, first_cell_c + i*shift_c) for i in range(4)]

@@ -45,5 +45,19 @@ class StateTest(unittest.TestCase):
         self.assertEqual(s._diag_lines_of_cell((0, 6), r2l=False), [])
         self.assertEqual(s._diag_lines_of_cell((5, 2), r2l=False), [])
 
+    def test_line_to_cells(self):
+        
+        s = State(None, None)
+
+        # rows
+        self.assertEqual(s.line_to_cells(0), [(0, 0), (0, 1), (0, 2), (0, 3)])
+        self.assertEqual(s.line_to_cells(2), [(0, 2), (0, 3), (0, 4), (0, 5)])
+        self.assertEqual(s.line_to_cells(23), [(5, 3), (5, 4), (5, 5), (5, 6)])
+
+        # cols
+        self.assertEqual(s.line_to_cells(24), [(0, 0), (1, 0), (2, 0), (3, 0)])
+        self.assertEqual(s.line_to_cells(26), [(2, 0), (3, 0), (4, 0), (5, 0)])
+        self.assertEqual(s.line_to_cells(44), [(2, 6), (3, 6), (4, 6), (5, 6)])
+
 if __name__ == "__main__":
     unittest.main()
