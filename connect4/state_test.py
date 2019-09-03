@@ -59,5 +59,18 @@ class StateTest(unittest.TestCase):
         self.assertEqual(s.line_to_cells(26), [(2, 0), (3, 0), (4, 0), (5, 0)])
         self.assertEqual(s.line_to_cells(44), [(2, 6), (3, 6), (4, 6), (5, 6)])
 
+        # r2l diags
+        self.assertEqual(s.line_to_cells(45), [(0, 3), (1, 2), (2, 1), (3, 0)])
+        self.assertEqual(s.line_to_cells(47), [(1, 3), (2, 2), (3, 1), (4, 0)])
+        self.assertEqual(s.line_to_cells(56), [(2, 6), (3, 5), (4, 4), (5, 3)])
+        self.assertEqual(s.line_to_cells(50), [(2, 3), (3, 2), (4, 1), (5, 0)])
+
+        # l2r diags
+        self.assertEqual(s.line_to_cells(57), [(0, 3), (1, 4), (2, 5), (3, 6)])
+        self.assertEqual(s.line_to_cells(60), [(0, 1), (1, 2), (2, 3), (3, 4)])
+        self.assertEqual(s.line_to_cells(61), [(1, 2), (2, 3), (3, 4), (4, 5)])
+        self.assertEqual(s.line_to_cells(68), [(2, 0), (3, 1), (4, 2), (5, 3)])
+
+
 if __name__ == "__main__":
     unittest.main()
