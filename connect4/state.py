@@ -11,6 +11,7 @@ COL_LINES_IN_COL = 3
 NUM_ROW_LINES = BOARD_HEIGHT * ROW_LINES_IN_ROW
 NUM_COL_LINES = BOARD_WIDTH * COL_LINES_IN_COL
 NUM_DIAG_LINES_ONE_SIDE = 12
+NUM_TOTAL_LINES = NUM_ROW_LINES + NUM_COL_LINES + 2*NUM_DIAG_LINES_ONE_SIDE 
 
 AVAILABLE = 1
 UNAVAILABLE = 2
@@ -255,3 +256,62 @@ class State:
             return SINGLE
         else:
             return EMPTY
+
+    def _empty_cells_in_line(self, line):
+        """ Return list of empty cells in 'line'. """
+
+        return [(r, c) for r, c in self.line_to_cells(line) if self.board[r][c] == EMPTY]
+
+    def calc_state_vectors(self):
+        """ Calculate and store state vectors for both players. """
+
+        # TODO test this?
+        self.state_vector = {RED: {}, YELLOW: {}}
+
+        self.state_vector[RED]["available"] = []
+        self.state_vector[YELLOW]["available"] = []
+        self.state_vector[RED]["single"] = []
+        self.state_vector[YELLOW]["single"] = []
+        self.state_vector[RED]["double"] = []
+        self.state_vector[YELLOW]["double"] = []
+        self.state_vector[RED]["attack"] = []
+        self.state_vector[YELLOW]["attack"] = []
+        self.state_vector[RED]["unavialable"] = []
+        self.state_vector[YELLOW]["unavialable"] = []
+
+        for line in range(NUM_TOTAL_LINES):
+
+            # TODO change the status function to return for both lines to cut processing?
+            status_red = self.line_status(line, RED)
+            status_yellow = self.line_status(line, YELLOW)
+
+            # TODO can this be optimized?
+            if status_red == EMPTY:
+                self.state_vector[RED]["available"].append(line)
+                self.state_vector[YELLOW]["available"].append(line)
+            else:
+                if status_red == SINGLE:
+                    self.state_vector[RED]["available"].append(line)
+                    self.state_vector[RED]["single"].append(line)
+                    self.state_vector[YELLOW]["unavailable"].append(line)
+                elif status_red == DOUBLE:
+                    self.state_vector[RED]["available"].append(line)
+                    self.state_vector[RED]["double"].append(line)
+                    self.state_vector[YELLOW]["unavailable"].append(line)
+                elif status_red == ATTACK:
+                    self.state_vector[RED]["available"].append(line)
+                    self.state_vector[RED]["attack"].append((line, self._empty_cells_in_line(line)[0]))
+                    self.state_vector[YELLOW]["unavailable"].append(line)
+                elif status_yellow == SINGLE:
+                    self.state_vector[RED]["unavailable"].append(line)
+                    self.state_vector[YELLOW]["available"].append(line)
+                    self.state_vector[YELLOW]["single"].append(line)
+                elif status_yellow == DOUBLE:
+                    self.state_vector[RED]["unavailable"].append(line)
+                    self.state_vector[YELLOW]["available"].append(line)
+                    self.state_vector[YELLOW]["double"].append(line)
+                elif status_yellow == ATTACK:
+                    self.state_vector[RED]["unavailable"].append(line)
+                    self.state_vector[YELLOW]["available"].append(line)
+                    self.state_vector[YELLOW]["attack"].append((line, self._empty_cells_in_line(line)[0]))
+
