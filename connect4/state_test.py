@@ -1,4 +1,5 @@
-from state import State
+from state import State, RED, YELLOW, AVAILABLE, UNAVAILABLE, ATTACK, DOUBLE, SINGLE
+from state_operations import empty_state, move
 
 import unittest
 
@@ -71,6 +72,22 @@ class StateTest(unittest.TestCase):
         self.assertEqual(s.line_to_cells(61), [(1, 2), (2, 3), (3, 4), (4, 5)])
         self.assertEqual(s.line_to_cells(68), [(2, 0), (3, 1), (4, 2), (5, 3)])
 
+    def test_line_status(self):
+        
+        state = empty_state()
+        state = move(move(move(state, 2), 3), 2)
+
+        self.assertEqual(state.line_status(0, RED), AVAILABLE)
+        self.assertEqual(state.line_status(0, YELLOW), AVAILABLE)
+        self.assertEqual(state.line_status(31, RED), SINGLE)
+        self.assertEqual(state.line_status(32, RED), DOUBLE)
+        self.assertEqual(state.line_status(21, RED), UNAVAILABLE)
+        self.assertEqual(state.line_status(21, YELLOW), UNAVAILABLE)
+        self.assertEqual(state.line_status(23, YELLOW), SINGLE)
+        self.assertEqual(state.line_status(56, YELLOW), SINGLE)
+        self.assertEqual(state.line_status(56, RED), UNAVAILABLE)
+        self.assertEqual(state.line_status(55, RED), SINGLE)
+        self.assertEqual(state.line_status(68, YELLOW), UNAVAILABLE)
 
 if __name__ == "__main__":
     unittest.main()

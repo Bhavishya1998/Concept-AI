@@ -1,11 +1,6 @@
-from state import State, RED, YELLOW, EMPTY, BOARD_HEIGHT, BOARD_WIDTH
+from state import State, other_player, RED, YELLOW, EMPTY, BOARD_HEIGHT, BOARD_WIDTH
 from copy import deepcopy
 from n_dim_matrix import n_dim_matrix
-
-def other_player(player: int):
-    """ Return the opposite player. """
-
-    return RED if player == YELLOW else YELLOW
 
 def move(state: State, column: int):
     """ Drop the next player's coin into the 'column' and return the new game state object. """

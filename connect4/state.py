@@ -11,8 +11,17 @@ COL_LINES_IN_COL = 3
 NUM_ROW_LINES = BOARD_HEIGHT * ROW_LINES_IN_ROW
 NUM_COL_LINES = BOARD_WIDTH * COL_LINES_IN_COL
 NUM_DIAG_LINES_ONE_SIDE = 12
-# TODO correct this
-# TODO refactor?
+
+AVAILABLE = 1
+UNAVAILABLE = 2
+ATTACK = 3
+SINGLE = 4
+DOUBLE = 5
+
+def other_player(player: int):
+    """ Return the opposite player. """
+
+    return RED if player == YELLOW else YELLOW
 
 class State:
     
@@ -134,17 +143,16 @@ class State:
             self._diag_lines_of_cell(cell, True) + \
             self._diag_lines_of_cell(cell, False)
 
-    # TODO refactor next two functions
-    def _first_cell_of_row_line(self, row):
+    def _first_cell_of_row_line(self, line):
         """ Return first cell of row. """
 
-        return row // ROW_LINES_IN_ROW, row % ROW_LINES_IN_ROW
+        return line // ROW_LINES_IN_ROW, line % ROW_LINES_IN_ROW
 
-    def _first_cell_of_col_line(self, col):
+    def _first_cell_of_col_line(self, line):
         """ Return first cell of column. """
 
-        adjusted_col = col - NUM_ROW_LINES
-        return adjusted_col % COL_LINES_IN_COL, adjusted_col // COL_LINES_IN_COL
+        adjusted_line = line - NUM_ROW_LINES
+        return adjusted_line % COL_LINES_IN_COL, adjusted_line // COL_LINES_IN_COL
 
     def diagonal_of_line(self, line):
         """ Return the diagonal that the line belongs to. """
@@ -215,3 +223,35 @@ class State:
             shift_c = 1
             
         return [(first_cell_r + i*shift_r, first_cell_c + i*shift_c) for i in range(4)]
+
+    def line_status(self, line, player):
+        """ Return the status of 'line'. """
+
+        other = other_player(player)
+
+        if player == RED:
+            attack = RED ** 3
+            double = RED ** 2
+            single = RED
+        else:
+            attack = YELLOW ** 3
+            double = YELLOW ** 2
+            single = YELLOW
+
+        # calculate product of cells in line
+        cells = self.line_to_cells(line)
+        prod = 1
+        for r, c in cells:
+            prod *= self.board[r][c]
+
+        if prod % other == 0:
+            # other player has a coin on the line
+            return UNAVAILABLE
+        elif prod == attack:
+            return ATTACK
+        elif prod == double:
+            return DOUBLE
+        elif prod == single:
+            return SINGLE
+        else:
+            return EMPTY
