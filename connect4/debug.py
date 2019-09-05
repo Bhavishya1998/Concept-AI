@@ -27,3 +27,26 @@ def line_status_str(status):
         return "DOUBLE"
     elif status == ATTACK:
         return "ATTACK"
+
+def state_vector_dump(state: State):
+    state.calc_state_vectors()
+    print("RED")
+    print("Single : ", state.state_vector[RED]["single"])
+    print("Double : ", state.state_vector[RED]["double"])
+    print("Attack : ", state.state_vector[RED]["attack"])
+    print("Unavailable : ", state.state_vector[RED]["unavailable"])
+    print("\nYELLOW")
+    print("Single : ", state.state_vector[YELLOW]["single"])
+    print("Double : ", state.state_vector[YELLOW]["double"])
+    print("Attack : ", state.state_vector[YELLOW]["attack"])
+    print("Unavailable : ", state.state_vector[YELLOW]["unavailable"])
+
+# NOTE haven't implemented count vector in state yet 
+def print_count_vector(state: State):
+    state.calc_state_vectors()
+    print("RED")
+    for k, v in state.state_vector[RED].items():
+        print(k, " : ", len(v))
+    print("\nYELLOW")
+    for k, v in state.state_vector[YELLOW].items():
+        print(k, " : ", len(v))

@@ -276,8 +276,8 @@ class State:
         self.state_vector[YELLOW]["double"] = []
         self.state_vector[RED]["attack"] = []
         self.state_vector[YELLOW]["attack"] = []
-        self.state_vector[RED]["unavialable"] = []
-        self.state_vector[YELLOW]["unavialable"] = []
+        self.state_vector[RED]["unavailable"] = []
+        self.state_vector[YELLOW]["unavailable"] = []
 
         for line in range(NUM_TOTAL_LINES):
 
