@@ -22,4 +22,4 @@ def empty_state():
     """ Return a game object with an empty board and red to move. """
 
     board = n_dim_matrix((BOARD_HEIGHT, BOARD_WIDTH), fill=EMPTY)
-    return State(board, RED)
+    return State(board, YELLOW)
