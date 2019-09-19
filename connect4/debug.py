@@ -16,6 +16,12 @@ def print_board(state: State):
 
     print()
 
+def adjust_cell(cell):
+    """ Adjust a cell to fit the format of the email thread. """
+
+    r, c = cell
+    return 6 - r, c + 1
+
 def line_status_str(status):
     if status == EMPTY:
         return "EMPTY"
