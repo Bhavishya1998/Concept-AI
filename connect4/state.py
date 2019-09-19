@@ -324,10 +324,10 @@ class State:
     def line_future_state(self, line):
         """ Return the future-state for a line. """
 
-        cells = [self.line_to_cells(line)[-1]] if line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES else self.line_to_cells(line)
+        # columns don't have a future state
+        cells = [] if line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES else self.line_to_cells(line)
 
         future_state = []
-        # TODO what about columns?
 
         for cell in cells:
             cell_below = self._cell_below(cell)

@@ -97,7 +97,7 @@ class StateTest(unittest.TestCase):
         self.assertEqual(state.line_future_state(17), [(5, 1), (5, 2)])
         self.assertEqual(state.line_future_state(14), [(4, 2), (4, 4)])
         self.assertEqual(state.line_future_state(15), [(4, 4)])
-        self.assertEqual(state.line_future_state(27), [(4, 1)])
+        self.assertEqual(state.line_future_state(27), [])
         self.assertEqual(state.line_future_state(57), [(1, 3), (2, 4)])
         self.assertEqual(state.line_future_state(56), [])
 
