@@ -77,17 +77,29 @@ class StateTest(unittest.TestCase):
         state = empty_state()
         state = move(move(move(state, 2), 3), 2)
 
-        self.assertEqual(state.line_status(0, RED), AVAILABLE)
         self.assertEqual(state.line_status(0, YELLOW), AVAILABLE)
-        self.assertEqual(state.line_status(31, RED), SINGLE)
-        self.assertEqual(state.line_status(32, RED), DOUBLE)
-        self.assertEqual(state.line_status(21, RED), UNAVAILABLE)
+        self.assertEqual(state.line_status(0, RED), AVAILABLE)
+        self.assertEqual(state.line_status(31, YELLOW), SINGLE)
+        self.assertEqual(state.line_status(32, YELLOW), DOUBLE)
         self.assertEqual(state.line_status(21, YELLOW), UNAVAILABLE)
-        self.assertEqual(state.line_status(23, YELLOW), SINGLE)
-        self.assertEqual(state.line_status(56, YELLOW), SINGLE)
-        self.assertEqual(state.line_status(56, RED), UNAVAILABLE)
-        self.assertEqual(state.line_status(55, RED), SINGLE)
-        self.assertEqual(state.line_status(68, YELLOW), UNAVAILABLE)
+        self.assertEqual(state.line_status(21, RED), UNAVAILABLE)
+        self.assertEqual(state.line_status(23, RED), SINGLE)
+        self.assertEqual(state.line_status(56, RED), SINGLE)
+        self.assertEqual(state.line_status(56, YELLOW), UNAVAILABLE)
+        self.assertEqual(state.line_status(55, YELLOW), SINGLE)
+        self.assertEqual(state.line_status(68, RED), UNAVAILABLE)
+
+    def test_line_future_state(self):
+        
+        # board used in case study 4 email thread
+        state = move(move(move(move(move(move(move(move(move(move(move(move(move(empty_state(), 5), 3), 5), 3), 6), 6), 0), 6), 0), 5), 0), 0), 4)
+
+        self.assertEqual(state.line_future_state(17), [(5, 1), (5, 2)])
+        self.assertEqual(state.line_future_state(14), [(4, 2), (4, 4)])
+        self.assertEqual(state.line_future_state(15), [(4, 4)])
+        self.assertEqual(state.line_future_state(27), [(4, 1)])
+        self.assertEqual(state.line_future_state(57), [(1, 3), (2, 4)])
+        self.assertEqual(state.line_future_state(56), [])
 
 if __name__ == "__main__":
     unittest.main()

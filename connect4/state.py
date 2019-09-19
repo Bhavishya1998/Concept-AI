@@ -30,6 +30,12 @@ class State:
         self.board = board
         self.next_to_move = next_to_move
 
+    def _cell_below(self, cell):
+        """ Return the cell below 'cell', or None if 'cell' is in the bottom row. """
+
+        r, c = cell
+        return (r+1, c) if r < BOARD_HEIGHT - 1 else None
+
     def _row_lines_of_cell(self, cell):
         """ Return list of all row lines that 'cell' belongs to. """
 
@@ -315,3 +321,17 @@ class State:
                     self.state_vector[YELLOW]["available"].append(line)
                     self.state_vector[YELLOW]["attack"].append((line, self._empty_cells_in_line(line)[0]))
 
+    def line_future_state(self, line):
+        """ Return the future-state for a line. """
+
+        cells = [self.line_to_cells(line)[-1]] if line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES else self.line_to_cells(line)
+
+        future_state = []
+        # TODO what about columns?
+
+        for cell in cells:
+            cell_below = self._cell_below(cell)
+            if cell_below is not None and self.board[cell_below[0]][cell_below[1]] == EMPTY:
+                future_state.append(cell_below)
+
+        return future_state
