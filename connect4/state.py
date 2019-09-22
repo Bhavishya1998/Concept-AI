@@ -349,10 +349,13 @@ class State:
 
         single_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == SINGLE]
         double_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
+        attack_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == ATTACK]
 
         for line in single_occupied_lines:
             future_state[line] = (SINGLE, self.line_future_state(line))
         for line in double_occupied_lines:
             future_state[line] = (DOUBLE, self.line_future_state(line))
+        for line in attack_occupied_lines:
+            future_state[line] = (ATTACK, self.line_future_state(line))
 
         return future_state
