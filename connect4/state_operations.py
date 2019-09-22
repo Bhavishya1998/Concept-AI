@@ -3,7 +3,7 @@ from copy import deepcopy
 from n_dim_matrix import n_dim_matrix
 
 def move(state: State, column: int):
-    """ Drop the next player's coin into the 'column' and return the new game state object. """
+    """ Drop the next player's coin into 'column' and return the new game state object. """
 
     # find the highest occupied slot in the column
     walk = 0
