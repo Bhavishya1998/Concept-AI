@@ -322,7 +322,7 @@ class State:
                     self.state_vector[YELLOW]["attack"].append((line, self._empty_cells_in_line(line)[0]))
 
     def line_future_state(self, line):
-        """ Return the future-state for a line. """
+        """ Return the future state for a line. """
 
         # columns don't have a future state
         cells = [] if line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES else self.line_to_cells(line)
@@ -333,5 +333,26 @@ class State:
             cell_below = self._cell_below(cell)
             if cell_below is not None and self.board[cell_below[0]][cell_below[1]] == EMPTY:
                 future_state.append(cell_below)
+
+        return future_state
+
+    def future_state(self, player):
+        """
+        Return a dictionary with lines singly and doubly occupied by the player as keys and a tuple of their status and future state as values.
+        """
+
+        # TODO get lists of singly and doubly occupied lines
+        # TODO get their future states
+        # TODO create dictionary
+
+        future_state = {}
+
+        single_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == SINGLE]
+        double_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
+
+        for line in single_occupied_lines:
+            future_state[line] = (SINGLE, self.line_future_state(line))
+        for line in double_occupied_lines:
+            future_state[line] = (DOUBLE, self.line_future_state(line))
 
         return future_state
