@@ -347,6 +347,7 @@ class State:
 
         future_state = {}
 
+        # NOTE would a single loop be more efficient? Probably won't be able to use list comprehensions then.
         single_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == SINGLE]
         double_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
         attack_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == ATTACK]
@@ -359,3 +360,17 @@ class State:
             future_state[line] = (ATTACK, self.line_future_state(line))
 
         return future_state
+
+    def line_intersection_cells(self, line1, line2):
+        """ Return the list of cells common between two lines. """
+
+        intersection_cells = []
+        cells1 = self.line_to_cells(line1)
+        cells2 = self.line_to_cells(line2)
+
+        for cell in cells1:
+            if cell in cells2:
+                intersection_cells.append(cell)
+
+        # lines don't intersect
+        return intersection_cells

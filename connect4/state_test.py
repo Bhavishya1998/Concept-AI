@@ -101,5 +101,14 @@ class StateTest(unittest.TestCase):
         self.assertEqual(state.line_future_state(57), [(1, 3), (2, 4)])
         self.assertEqual(state.line_future_state(56), [])
 
+    def test_line_intersection_cells(self):
+        
+        state = empty_state()
+
+        self.assertEqual(state.line_intersection_cells(0, 1), [(0, 1), (0, 2), (0, 3)])
+        self.assertEqual(state.line_intersection_cells(27, 1), [(0, 1)])
+        self.assertEqual(state.line_intersection_cells(27, 2), [])
+        self.assertEqual(state.line_intersection_cells(46, 58), [(1, 3)])
+
 if __name__ == "__main__":
     unittest.main()
