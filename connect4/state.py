@@ -374,3 +374,18 @@ class State:
 
         # lines don't intersect
         return intersection_cells
+
+    def double_threats_intersections(self, player):
+        """ Return a list of tuples with exisitng, intersecting attacking lines for a player and their points of intersection. """
+
+        attack_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == ATTACK]
+        intersection_list = []
+        # TODO refactor
+
+        for index1 in range(len(attack_lines)):
+            for index2 in range(index1+1, len(attack_lines)):
+                intersection_cells = self.line_intersection_cells(attack_lines[index1], attack_lines[index2])
+                if len(intersection_cells) > 0:
+                    intersection_list.append((attack_lines[index1], attack_lines[index2], intersection_cells))
+
+        return intersection_list

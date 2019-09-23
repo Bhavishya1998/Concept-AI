@@ -110,5 +110,9 @@ class StateTest(unittest.TestCase):
         self.assertEqual(state.line_intersection_cells(27, 2), [])
         self.assertEqual(state.line_intersection_cells(46, 58), [(1, 3)])
 
+    def test_double_threats_intersections(self):
+        pass
+        # TODO add tests        
+
 if __name__ == "__main__":
     unittest.main()
