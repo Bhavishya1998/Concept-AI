@@ -382,7 +382,7 @@ class State:
 
     def line_potential_threat(self, line, player):
         """
-        Return list of coordinate of the cell that can be played by 'player' to attack this line.
+        Return list of coordinates of the cells that can be played by 'player' to attack this line.
         An empty list is returned if an attack is not possible or the line is already under attack.
         """
 
@@ -407,7 +407,7 @@ class State:
         return potential_cells
 
     def is_sure_win(self):
-        """ Return True if the state is a sure win. """
+        """ Return True if the state is a sure win for the current player. """
 
         # NOTE should we check if a winning move can be played this turn?
 
