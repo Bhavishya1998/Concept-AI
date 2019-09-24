@@ -1,6 +1,6 @@
 from state import State, RED, YELLOW, EMPTY
 from state_operations import empty_state, move
-from debug import print_board, line_status_str, print_count_vector, state_vector_dump, adjust_cell, print_future_state_table, print_double_threat_intersection_table
+from debug import print_board, line_status_str, print_count_vector, state_vector_dump, adjust_cell, print_future_state_table, print_double_threat_table
 
 if __name__ == "__main__":
     # s = empty_state()
@@ -24,7 +24,8 @@ if __name__ == "__main__":
     # state = move(move(move(move(move(empty_state(), 3), 2), 4), 3), 4)
 
     print_board(state)
-    print(state.is_sure_win())
+    print_double_threat_table(state)
+    # print(state.potential_double_threats(YELLOW))
     # print(state.line_potential_threat(55, RED))
     # print_future_state_table(state)
     # print(state.double_threats_intersections(YELLOW))

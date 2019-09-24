@@ -386,6 +386,7 @@ class State:
         An empty list is returned if an attack is not possible or the line is already under attack.
         """
 
+        # TODO if the future state of a ATTACK line is zeroed, that can also be counted as a threat
         if self.line_status(line, player) != DOUBLE or self.line_future_state(line) != []:
             return []
 
@@ -406,9 +407,40 @@ class State:
 
         return potential_cells
 
+    def potential_double_threats(self, player):
+        """
+        Return list of tuples where the first two elements are the lines involved in a potential double threat 
+        and the 3rd is the cell to play.
+        """
+
+        double_threats = []
+        
+        # lines which can potentially be attacked
+        double_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
+
+        for index1 in range(len(double_lines)):
+            for index2 in range(index1+1, len(double_lines)):
+                intersection_cells = self.line_intersection_cells(double_lines[index1], double_lines[index2])
+                if len(intersection_cells) > 0:
+                    # the lines intersect
+
+                    line1_attack_cells = self.line_potential_threat(double_lines[index1], player)
+                    line2_attack_cells = self.line_potential_threat(double_lines[index2], player)
+
+                    if len(line1_attack_cells) > 0 and len(line2_attack_cells) > 0:
+                        # both lines can be attacked
+
+                        for intersection_cell in intersection_cells:
+                            if intersection_cell in line1_attack_cells and intersection_cell in line2_attack_cells:
+                                double_threats.append((double_lines[index1], double_lines[index2], intersection_cell))
+
+        # no double threats can be played this turn
+        return double_threats
+
     def is_sure_win(self):
         """ Return True if the state is a sure win for the current player. """
 
+        # NOTE use the length of potential double threats here? It would probably be slower.
         # NOTE should we check if a winning move can be played this turn?
 
         player = self.next_to_move

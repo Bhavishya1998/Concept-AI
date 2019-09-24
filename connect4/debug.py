@@ -97,3 +97,15 @@ def print_future_state_table(state: State):
     for line, val in yellow_fs.items():
         status, fs = val
         print(f"line {adjust_line(line, state)} | {line_status_str(status)} | future state {[adjust_cell(cell) for cell in fs]}")
+
+def print_double_threat_table(state: State):
+    red_pdt = state.potential_double_threats(RED)
+    yellow_pdt = state.potential_double_threats(YELLOW)
+
+    print("RED")
+    for line1, line2, cell in red_pdt:
+        print(f"{adjust_line(line1)} | {adjust_line(line2)} | {adjust_cell(cell)}")
+
+    print("\nYELLOW")
+    for line1, line2, cell in yellow_pdt:
+        print(f"{adjust_line(line1)} | {adjust_line(line2)} | {adjust_cell(cell)}")
