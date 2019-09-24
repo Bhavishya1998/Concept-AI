@@ -36,6 +36,11 @@ class State:
         r, c = cell
         return (r+1, c) if r < BOARD_HEIGHT - 1 else None
 
+    def _is_col(self, line):
+        """ Return True if line is along a column. """
+
+        return line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES
+
     def _row_lines_of_cell(self, cell):
         """ Return list of all row lines that 'cell' belongs to. """
 
@@ -325,7 +330,7 @@ class State:
         """ Return the future state for a line. """
 
         # columns don't have a future state
-        cells = [] if line >= NUM_ROW_LINES and line < NUM_ROW_LINES + NUM_COL_LINES else self.line_to_cells(line)
+        cells = [] if self._is_col(line) else self.line_to_cells(line)
 
         future_state = []
 
@@ -375,17 +380,57 @@ class State:
         # lines don't intersect
         return intersection_cells
 
-    def double_threats_intersections(self, player):
-        """ Return a list of tuples with exisitng, intersecting attacking lines for a player and their points of intersection. """
+    def line_potential_threat(self, line, player):
+        """
+        Return list of coordinate of the cell that can be played by 'player' to attack this line.
+        An empty list is returned if an attack is not possible or the line is already under attack.
+        """
 
-        attack_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == ATTACK]
-        intersection_list = []
-        # TODO refactor
+        if self.line_status(line, player) != DOUBLE or self.line_future_state(line) != []:
+            return []
 
-        for index1 in range(len(attack_lines)):
-            for index2 in range(index1+1, len(attack_lines)):
-                intersection_cells = self.line_intersection_cells(attack_lines[index1], attack_lines[index2])
+        cells = self.line_to_cells(line)
+        
+        potential_cells = []
+
+        if self._is_col(line):
+            # future state is not defined for columns, use different method here
+
+            # column line can only be attacked by playing the second cell from the top
+            potential_cells.append(cells[1])
+        else:
+            for cell in cells:
+                r, c = cell
+                if self.board[r][c] == EMPTY:
+                    potential_cells.append(cell)
+
+        return potential_cells
+
+    def is_sure_win(self):
+        """ Return True if the state is a sure win. """
+
+        # NOTE should we check if a winning move can be played this turn?
+
+        player = self.next_to_move
+        
+        # lines which can potentially be attacked
+        double_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
+
+        for index1 in range(len(double_lines)):
+            for index2 in range(index1+1, len(double_lines)):
+                intersection_cells = self.line_intersection_cells(double_lines[index1], double_lines[index2])
                 if len(intersection_cells) > 0:
-                    intersection_list.append((attack_lines[index1], attack_lines[index2], intersection_cells))
+                    # the lines intersect
 
-        return intersection_list
+                    line1_attack_cells = self.line_potential_threat(double_lines[index1], player)
+                    line2_attack_cells = self.line_potential_threat(double_lines[index2], player)
+
+                    if len(line1_attack_cells) > 0 and len(line2_attack_cells) > 0:
+                        # both lines can be attacked
+
+                        for intersection_cell in intersection_cells:
+                            if intersection_cell in line1_attack_cells and intersection_cell in line2_attack_cells:
+                                return True
+
+        # no double threats can be played this turn
+        return False
