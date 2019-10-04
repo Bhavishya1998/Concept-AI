@@ -1,4 +1,4 @@
-from state import State, RED, YELLOW, AVAILABLE, UNAVAILABLE, ATTACK, DOUBLE, SINGLE
+from state import State, RED, YELLOW, AVAILABLE, UNAVAILABLE, CURRENT_ATTACK, FUTURE_ATTACK, DOUBLE, SINGLE
 from state_operations import empty_state, move
 
 import unittest
@@ -7,7 +7,7 @@ class StateTest(unittest.TestCase):
 
     def test_row_lines_of_cell(self):
         
-        s = State(None, None)
+        s = empty_state()
 
         self.assertEqual(s._row_lines_of_cell((0, 2)), [2, 1, 0])
         self.assertEqual(s._row_lines_of_cell((0, 3)), [3, 2, 1, 0])
@@ -16,7 +16,7 @@ class StateTest(unittest.TestCase):
 
     def test_col_lines_of_cell(self):
         
-        s = State(None, None)
+        s = empty_state()
 
         self.assertEqual(s._col_lines_of_cell((2, 0)), [26, 25, 24])
         self.assertEqual(s._col_lines_of_cell((2, 2)), [32, 31, 30])
@@ -24,7 +24,7 @@ class StateTest(unittest.TestCase):
 
     def test_r2l_diag_lines_of_cell(self):
         
-        s = State(None, None)
+        s = empty_state()
 
         # right to left
         self.assertEqual(s._diag_lines_of_cell((2, 2), r2l=True), [46, 47])
@@ -48,7 +48,7 @@ class StateTest(unittest.TestCase):
 
     def test_line_to_cells(self):
         
-        s = State(None, None)
+        s = empty_state()
 
         # rows
         self.assertEqual(s.line_to_cells(0), [(0, 0), (0, 1), (0, 2), (0, 3)])

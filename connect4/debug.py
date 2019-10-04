@@ -1,4 +1,4 @@
-from state import State, RED, YELLOW, EMPTY, BOARD_WIDTH, BOARD_HEIGHT, EMPTY, UNAVAILABLE, SINGLE, DOUBLE, ATTACK, NUM_ROW_LINES, NUM_COL_LINES, NUM_DIAG_LINES_ONE_SIDE
+from state import State, RED, YELLOW, EMPTY, BOARD_WIDTH, BOARD_HEIGHT, EMPTY, UNAVAILABLE, SINGLE, DOUBLE, CURRENT_ATTACK, FUTURE_ATTACK, NUM_ROW_LINES, NUM_COL_LINES, NUM_DIAG_LINES_ONE_SIDE
 
 def print_board(state: State):
     """ Print the game board to console. """
@@ -56,8 +56,10 @@ def line_status_str(status):
         return "SINGLE"
     elif status == DOUBLE:
         return "DOUBLE"
-    elif status == ATTACK:
-        return "ATTACK"
+    elif status == CURRENT_ATTACK:
+        return "CURRENT ATTACK"
+    elif status == FUTURE_ATTACK:
+        return "FUTURE ATTACK"
 
 def state_vector_dump(state: State):
     state.calc_state_vectors()

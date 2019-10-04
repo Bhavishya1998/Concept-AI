@@ -15,9 +15,15 @@ NUM_TOTAL_LINES = NUM_ROW_LINES + NUM_COL_LINES + 2*NUM_DIAG_LINES_ONE_SIDE
 
 AVAILABLE = 1
 UNAVAILABLE = 2
-ATTACK = 3
-SINGLE = 4
-DOUBLE = 5
+CURRENT_ATTACK = 3
+FUTURE_ATTACK = 4
+SINGLE = 5
+DOUBLE = 6
+
+WIN = 0
+LOSS = 1
+DRAW = 2
+UNCERTAIN = 3
 
 def other_player(player: int):
     """ Return the opposite player. """
@@ -30,11 +36,48 @@ class State:
         self.board = board
         self.next_to_move = next_to_move
 
+        self.calc_state_vectors()
+
     def _cell_below(self, cell):
         """ Return the cell below 'cell', or None if 'cell' is in the bottom row. """
 
         r, c = cell
         return (r+1, c) if r < BOARD_HEIGHT - 1 else None
+
+    def _col_num_empty_cells(self, column):
+        """ Return the number of empty cells in 'column'. """
+
+        num = 0
+        for row in range(BOARD_HEIGHT):
+            if self.board[row][column] == EMPTY:
+                num += 1
+            else:
+                break
+
+        return num
+
+    def col_highest_occupied_row(self, column):
+        """ Return the highest occupied row in a column, or None if the column is empty. """
+
+        # TODO use col_num_empty_cells here
+
+        walk = 0
+        while walk < BOARD_HEIGHT and self.board[walk][column] == EMPTY:
+            walk += 1
+
+        return walk if walk < BOARD_HEIGHT else None
+
+    def possible_moves(self):
+        """ Return list of possible moves for the next player. """
+
+        moves = []
+
+        for c in range(BOARD_WIDTH):
+            r = self.col_highest_occupied_row(c)
+            if r is not None:
+                moves.append((r, c))
+
+        return moves
 
     def _is_col(self, line):
         """ Return True if line is along a column. """
@@ -260,7 +303,10 @@ class State:
             # other player has a coin on the line
             return UNAVAILABLE
         elif prod == attack:
-            return ATTACK
+            if self.line_future_state(line) == []:
+                return CURRENT_ATTACK
+            else:
+                return FUTURE_ATTACK
         elif prod == double:
             return DOUBLE
         elif prod == single:
@@ -285,8 +331,10 @@ class State:
         self.state_vector[YELLOW]["single"] = []
         self.state_vector[RED]["double"] = []
         self.state_vector[YELLOW]["double"] = []
-        self.state_vector[RED]["attack"] = []
-        self.state_vector[YELLOW]["attack"] = []
+        self.state_vector[RED]["current_attack"] = []
+        self.state_vector[YELLOW]["current_attack"] = []
+        self.state_vector[RED]["future_attack"] = []
+        self.state_vector[YELLOW]["future_attack"] = []
         self.state_vector[RED]["unavailable"] = []
         self.state_vector[YELLOW]["unavailable"] = []
 
@@ -309,9 +357,13 @@ class State:
                     self.state_vector[RED]["available"].append(line)
                     self.state_vector[RED]["double"].append(line)
                     self.state_vector[YELLOW]["unavailable"].append(line)
-                elif status_red == ATTACK:
+                elif status_red == CURRENT_ATTACK:
                     self.state_vector[RED]["available"].append(line)
-                    self.state_vector[RED]["attack"].append((line, self._empty_cells_in_line(line)[0]))
+                    self.state_vector[RED]["current_attack"].append((line, self._empty_cells_in_line(line)[0]))
+                    self.state_vector[YELLOW]["unavailable"].append(line)
+                elif status_red == FUTURE_ATTACK:
+                    self.state_vector[RED]["available"].append(line)
+                    self.state_vector[RED]["future_attack"].append((line, self._empty_cells_in_line(line)[0]))
                     self.state_vector[YELLOW]["unavailable"].append(line)
                 elif status_yellow == SINGLE:
                     self.state_vector[RED]["unavailable"].append(line)
@@ -321,10 +373,14 @@ class State:
                     self.state_vector[RED]["unavailable"].append(line)
                     self.state_vector[YELLOW]["available"].append(line)
                     self.state_vector[YELLOW]["double"].append(line)
-                elif status_yellow == ATTACK:
+                elif status_yellow == CURRENT_ATTACK:
                     self.state_vector[RED]["unavailable"].append(line)
                     self.state_vector[YELLOW]["available"].append(line)
-                    self.state_vector[YELLOW]["attack"].append((line, self._empty_cells_in_line(line)[0]))
+                    self.state_vector[YELLOW]["current_attack"].append((line, self._empty_cells_in_line(line)[0]))
+                elif status_yellow == FUTURE_ATTACK:
+                    self.state_vector[RED]["unavailable"].append(line)
+                    self.state_vector[YELLOW]["available"].append(line)
+                    self.state_vector[YELLOW]["future_attack"].append((line, self._empty_cells_in_line(line)[0]))
 
     def line_future_state(self, line):
         """ Return the future state for a line. """
@@ -346,23 +402,18 @@ class State:
         Return a dictionary with lines singly and doubly occupied by the player as keys and a tuple of their status and future state as values.
         """
 
-        # TODO get lists of singly and doubly occupied lines
-        # TODO get their future states
-        # TODO create dictionary
-
         future_state = {}
 
         # NOTE would a single loop be more efficient? Probably won't be able to use list comprehensions then.
-        single_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == SINGLE]
-        double_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
-        attack_occupied_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == ATTACK]
 
-        for line in single_occupied_lines:
+        for line in self.state_vector[player]["single"]:
             future_state[line] = (SINGLE, self.line_future_state(line))
-        for line in double_occupied_lines:
+        for line in self.state_vector[player]["double"]:
             future_state[line] = (DOUBLE, self.line_future_state(line))
-        for line in attack_occupied_lines:
-            future_state[line] = (ATTACK, self.line_future_state(line))
+        for line, _ in self.state_vector[player]["current_attack"]:
+            future_state[line] = (CURRENT_ATTACK, self.line_future_state(line))
+        for line, _ in self.state_vector[player]["future_attack"]:
+            future_state[line] = (FUTURE_ATTACK, self.line_future_state(line))
 
         return future_state
 
@@ -386,7 +437,8 @@ class State:
         An empty list is returned if an attack is not possible or the line is already under attack.
         """
 
-        # TODO if the future state of a ATTACK line is zeroed, that can also be counted as a threat
+        # TODO if the future state of a ATTACK line is zeroed, that can also be counted as a threat, but it would attack a differnent line.
+        # TODO perhaps define does_move_create_opponent_current_attack as a more general function for both players?
         if self.line_status(line, player) != DOUBLE or self.line_future_state(line) != []:
             return []
 
@@ -437,32 +489,93 @@ class State:
         # no double threats can be played this turn
         return double_threats
 
-    def is_sure_win(self):
-        """ Return True if the state is a sure win for the current player. """
+    def does_move_create_opponent_current_attack(self, move, player):
+        """ Check if a move turns an opponent future attack into a current attack for 'player'. """
 
-        # NOTE use the length of potential double threats here? It would probably be slower.
-        # NOTE should we check if a winning move can be played this turn?
+        column = move
+        highest_occupied_row = self.col_highest_occupied_row(column)    
+        
+        if highest_occupied_row in [0, 1]:
+            # column is full or will be full
+
+            return False
+
+        cell_above = highest_occupied_row - 2, column
+
+        for line in self.lines_of_cell(cell_above):
+            if self.line_status(line, player) == FUTURE_ATTACK:
+                return True
+
+        return False
+
+    def consecutive_double_threats(self):
+        """ Return list of consecutive double threats that the next player can play. """
+        # TODO improve docstring
 
         player = self.next_to_move
-        
-        # lines which can potentially be attacked
-        double_lines = [line for line in range(NUM_TOTAL_LINES) if self.line_status(line, player) == DOUBLE]
+        other = other_player(player)
+        consec_double_threats = []
 
-        for index1 in range(len(double_lines)):
-            for index2 in range(index1+1, len(double_lines)):
-                intersection_cells = self.line_intersection_cells(double_lines[index1], double_lines[index2])
+        cells = self.possible_moves()
+
+        for cell in cells:
+            # TODO get lines, find which will be attacked
+            # TODO find the cell that blocks said attack
+            # TODO see if the FS of the future attacked lines of the cell above are zeroed
+            lines = self.lines_of_cell(cell)
+            double_lines = [line for line in lines if self.line_status(line, player) == DOUBLE]
+
+            for line in double_lines:
+                line_empty_cells = self._empty_cells_in_line(line)
+                cell_to_block = line_empty_cells[0] if line_empty_cells[0] == cell else line_empty_cells[1]
+                cell_to_block_r, cell_to_block_c = cell_to_block
+                # TODO what if playing the block creates an attack for the opponent?
+                # ^^^ probably can't. we are talking about zeroing an fs
+                if cell_to_block_r == 0:
+                    # there is no cell above the blocked cell
+                    continue
+                cell_above_blocked_cell = cell_to_block_r - 1, cell_to_block_c
+
+    def result(self):
+        """
+        Return the certain result for the game state for the current player, 
+        or UNCERTAIN if a conclusion can't be forcasted.
+        """
+
+        # NOTE use the length of potential double threats here? It would probably be slower.
+
+        player = self.next_to_move
+        other = other_player(player)
+
+        if len(self.state_vector[player]["current_attack"]) > 0:
+            return WIN
+            
+        # TODO check if opponent has an attack (Should we check if opponent has two non intersecting attacks?)
+        # it's a loss if the opponent has two non-interescting current attacks
+        if len(self.state_vector[other]["current_attack"]) >= 2:
+            empty_cell = self.state_vector[other]["current_attack"][0][1]
+            for _, cell in self.state_vector[other]["current_attack"]:
+                # check if at least one of the attacked lines have a different empty cell
+
+                if cell != empty_cell:
+                    return LOSS
+
+        # TODO should we check if the intersection cell is playable?
+        for index1 in range(len(self.state_vector[player]["double"])):
+            for index2 in range(index1+1, len(self.state_vector[player]["double"])):
+                intersection_cells = self.line_intersection_cells(self.state_vector[player]["double"][index1], self.state_vector[player]["double"][index2])
                 if len(intersection_cells) > 0:
                     # the lines intersect
 
-                    line1_attack_cells = self.line_potential_threat(double_lines[index1], player)
-                    line2_attack_cells = self.line_potential_threat(double_lines[index2], player)
+                    line1_attack_cells = self.line_potential_threat(self.state_vector[player]["double"][index1], player)
+                    line2_attack_cells = self.line_potential_threat(self.state_vector[player]["double"][index2], player)
 
                     if len(line1_attack_cells) > 0 and len(line2_attack_cells) > 0:
                         # both lines can be attacked
 
                         for intersection_cell in intersection_cells:
-                            if intersection_cell in line1_attack_cells and intersection_cell in line2_attack_cells:
-                                return True
+                            if intersection_cell in line1_attack_cells and intersection_cell in line2_attack_cells and not self.does_move_create_opponent_current_attack(intersection_cell[1], other):
+                                return WIN
 
-        # no double threats can be played this turn
-        return False
+        # no conlusion can be deduced
+        return UNCERTAIN
