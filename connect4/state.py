@@ -69,13 +69,14 @@ class State:
 
     def possible_moves(self):
         """ Return list of possible moves for the next player. """
-
+        
         moves = []
 
         for c in range(BOARD_WIDTH):
             r = self.col_highest_occupied_row(c)
-            if r is not None:
-                moves.append((r, c))
+            if r is None or r != 0:
+                lowest_empty_row = BOARD_HEIGHT - 1 if r is None else r - 1
+                moves.append((lowest_empty_row, c))
 
         return moves
 
