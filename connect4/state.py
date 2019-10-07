@@ -518,6 +518,8 @@ class State:
 
         cells = self.possible_moves()
 
+        # NOTE a move creates a future attack and a double attack, and the resulting block converts the future attack into a current attack?
+
         for cell in cells:
             # TODO get lines, find which will be attacked
             # TODO find the cell that blocks said attack
@@ -529,12 +531,18 @@ class State:
                 line_empty_cells = self._empty_cells_in_line(line)
                 cell_to_block = line_empty_cells[0] if line_empty_cells[0] == cell else line_empty_cells[1]
                 cell_to_block_r, cell_to_block_c = cell_to_block
-                # TODO what if playing the block creates an attack for the opponent?
+                
+                # NOTE what if playing the block creates an attack for the opponent?
                 # ^^^ probably can't. we are talking about zeroing an fs
+                
                 if cell_to_block_r == 0:
                     # there is no cell above the blocked cell
                     continue
+                
                 cell_above_blocked_cell = cell_to_block_r - 1, cell_to_block_c
+                double_lines_above = [line_above for line_above in self.lines_of_cell(cell_above_blocked_cell) if self.line_status(line_above, player) == DOUBLE]
+                # for line_above in double_lines_above:
+                #     if self.line_fu
 
     def result(self):
         """

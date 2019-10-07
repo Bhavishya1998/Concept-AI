@@ -1,4 +1,5 @@
 from state import State, RED, YELLOW, EMPTY, BOARD_WIDTH, BOARD_HEIGHT, EMPTY, UNAVAILABLE, SINGLE, DOUBLE, CURRENT_ATTACK, FUTURE_ATTACK, NUM_ROW_LINES, NUM_COL_LINES, NUM_DIAG_LINES_ONE_SIDE
+from tree import Node
 
 def print_board(state: State):
     """ Print the game board to console. """
@@ -111,3 +112,10 @@ def print_double_threat_table(state: State):
     print("\nYELLOW")
     for line1, line2, cell in yellow_pdt:
         print(f"{adjust_line(line1)} | {adjust_line(line2)} | {adjust_cell(cell)}")
+
+def print_tree(node: Node):
+    print_board(node.state)
+    for child in node.children:
+        print_tree(child)
+
+    # print("--------------------------------------------------")
