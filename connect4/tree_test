@@ -1,0 +1,74 @@
+class Node:
+
+    def __init__(self, state: State):
+        self.state = state
+        self.children = {}
+        self.value = None
+
+    def create_children(self):
+        """ Create list of all children of this node. """
+
+        moves = self.state.possible_moves()
+        
+        self.children = [Node(move(self.state, c)) for _, c in moves]
+
+    def create_subtree(self, level):
+        
+        if level < 0:
+            return
+        
+        self.create_children()
+
+        for child in self.children:
+            child.create_subtree(level-1)
+            
+            
+    def assured_result(self):
+        """ Return True if this state leads to an assured conclusion, otherwise False. """
+
+        return (self.state.win_probs[RED] == 0.0 or self.state.win_probs[RED] == 1.0) and \
+               (self.state.win_probs[YELLOW] == 0.0 or self.state.win_probs[YELLOW] == 1.0)
+
+    def assured_value(self):
+        """ Return node value in case of an assured result. """
+
+        return self.state.win_probs
+
+    def calculate_value(self):
+        """ Calculate the value of this node using the values of all children nodes (Backward Propagation). """
+
+        # TODO define value function
+        return {
+            RED: sum(map(lambda n: n.value[RED], self.children.values())) / len(self.children), 
+            YELLOW: sum(map(lambda n: n.value[YELLOW], self.children.values())) / len(self.children)
+        }
+
+    def generate_subtree(self, depth=None):
+        """
+        Recursively generate the subtree below this node of the desired depth and return the result. 
+        A depth of None generates the entire subtree.
+        """
+
+        if depth is None or depth > 0:
+            if self.assured_result():
+                self.value = self.assured_value()
+
+            else:
+                self.create_children()
+                for child in self.children:
+                    child.generate_subtree((None if depth is None else depth-1))
+
+
+                #self.value = self.calculate_value()
+
+            # DEBUG
+            # if self.value[X] != 0.0 and self.value[O] != 0.0:
+            # print_board(self.state)
+            # print(self.value)
+            # print()
+
+            return self.value
+        else:
+
+            # TODO this makes depth unusable
+            return None
